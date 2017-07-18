@@ -50,7 +50,7 @@ public class EscuchaCliente extends Thread {
 					paqueteUsuario = (PaqueteUsuario) (gson.fromJson(cadenaLeida, PaqueteUsuario.class));
 
 					// Si se puede loguear el usuario le envio un mensaje de exito y el paquete usuario con los datos
-					if (Servidor.loguearUsuario(paqueteUsuario)) {
+					if (Servidor.getConector().loguearUsuario(paqueteUsuario)) {
 
 						paqueteUsuario.setListaDeConectados(Servidor.UsuariosConectados);
 						paqueteUsuario.setComando(Comando.INICIOSESION);
@@ -120,6 +120,7 @@ public class EscuchaCliente extends Thread {
 						}
 					}
 					Servidor.mensajeAAll(count);
+					
 					break;
 				case Comando.MP:
 					paqueteMensaje = (PaqueteMensaje) (gson.fromJson(cadenaLeida, PaqueteMensaje.class));
@@ -137,6 +138,32 @@ public class EscuchaCliente extends Thread {
 
 					} else {
 						System.out.println("Server: Mensaje No Enviado!");
+					}
+					break;
+					
+				case Comando.REGISTRO:
+					paqueteUsuario = (PaqueteUsuario) (gson.fromJson(cadenaLeida, PaqueteUsuario.class));
+					if (Servidor.getConector().registrarUsuario(paqueteUsuario)) {
+						
+						paqueteUsuario.setComando(Comando.REGISTRO);
+						paqueteUsuario.setMensaje(Paquete.msjExito);
+						
+						Servidor.UsuariosConectados.add(paqueteUsuario.getUsername());
+
+						// Consigo el socket, y entonces ahora pongo el username y el socket en el map
+						int index = Servidor.UsuariosConectados.indexOf(paqueteUsuario.getUsername());
+						Servidor.mapConectados.put(paqueteUsuario.getUsername(), Servidor.SocketsConectados.get(index));
+
+						salida.writeObject(gson.toJson(paqueteUsuario));
+						
+						// COMO SE CONECTO 1 LE DIGO AL SERVER QUE LE MANDE A TODOS LOS QUE SE CONECTAN
+						synchronized(Servidor.atencionConexiones){
+							Servidor.atencionConexiones.notify();
+						}
+						// Si el usuario no se pudo registrar le envio un msj de fracaso
+					} else {
+						paqueteUsuario.setMensaje(Paquete.msjFracaso);
+						salida.writeObject(gson.toJson(paqueteUsuario));
 					}
 					break;
 

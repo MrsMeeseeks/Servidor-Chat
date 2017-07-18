@@ -33,6 +33,7 @@ public class Servidor extends Thread {
 	
 	private static ServerSocket serverSocket;
 	private final int puerto = 1234;
+	private static Conector conexionDB;
 	
 	private static Thread server;
 	
@@ -145,6 +146,9 @@ public class Servidor extends Thread {
 	@Override
 	public void run() {
 		try {
+			conexionDB = new Conector();
+			conexionDB.connect();
+			
 			estadoServer = true;
 			log.append("Iniciando el servidor..." + System.lineSeparator());
 			serverSocket = new ServerSocket(puerto);
@@ -195,22 +199,7 @@ public class Servidor extends Thread {
 		SocketsConectados = socketsConectados;
 	}
 
-	public static boolean loguearUsuario(PaqueteUsuario user) {
-		boolean result = true;
-		if(UsuariosConectados.contains(user.getUsername())) {
-			result = false;
-		}
-		// Si existe inicio sesion
-		if (result) {
-			Servidor.log.append("El usuario " + user.getUsername() + " ha iniciado sesión." + System.lineSeparator());
-			return true;
-		} else {
-			// Si no existe informo y devuelvo false
-			Servidor.log.append("El usuario " + user.getUsername() + " ya se encuentra logeado." + System.lineSeparator());
-			return false;
-		}
-	}
-
+	
 	public static boolean mensajeAUsuario(PaqueteMensaje pqm) {
 		boolean result = true;
 		if(!UsuariosConectados.contains(pqm.getUserReceptor())) {
@@ -249,5 +238,9 @@ public class Servidor extends Thread {
 
 	public static void setPersonajesConectados(Map<String, Socket> personajesConectados) {
 		Servidor.mapConectados = personajesConectados;
+	}
+	
+	public static Conector getConector() {
+		return conexionDB;
 	}
 }
