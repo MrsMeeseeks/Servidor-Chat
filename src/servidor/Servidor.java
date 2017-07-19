@@ -148,7 +148,6 @@ public class Servidor extends Thread {
 		try {
 			conexionDB = new Conector();
 			conexionDB.connect();
-			//BORREN ESTE COMENTARIO FUE SOLO PAR APODER COMMITEAR
 			estadoServer = true;
 			log.append("Iniciando el servidor..." + System.lineSeparator());
 			serverSocket = new ServerSocket(puerto);

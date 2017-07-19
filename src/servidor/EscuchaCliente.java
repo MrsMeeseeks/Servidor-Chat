@@ -41,6 +41,7 @@ public class EscuchaCliente extends Thread {
 			String cadenaLeida = (String) entrada.readObject();
 
 			while (!((paquete = gson.fromJson(cadenaLeida, Paquete.class)).getComando() == Comando.DESCONECTAR)) {							
+				
 				switch (paquete.getComando()) {
 
 				case Comando.INICIOSESION:
@@ -76,16 +77,7 @@ public class EscuchaCliente extends Thread {
 						synchronized (this) {
 							this.wait(200);
 						}
-						entrada.close();
-						salida.close();
-
-						Servidor.SocketsConectados.remove(socket);
-						Servidor.getClientesConectados().remove(this);
-
-						socket.close();
-						this.stop();
-
-						return;
+						break;						
 					}
 
 				case Comando.TALK:
