@@ -85,11 +85,15 @@ public class Servidor extends Thread {
 				server.start(); // Se lanza un nuevo hilo 
 				btnIniciar.setEnabled(false);
 				btnParar.setEnabled(true);
+				ventana.getRootPane().setDefaultButton(btnParar);
+				btnIniciar.requestFocus();
 			}
 		});
 
 		ventana.getContentPane().add(btnIniciar);
-
+		ventana.getRootPane().setDefaultButton(btnIniciar);
+		btnIniciar.requestFocus();
+		
 		btnParar.setText("Parar Servidor");
 		btnParar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -111,6 +115,8 @@ public class Servidor extends Thread {
 				}
 				btnParar.setEnabled(false);
 				btnIniciar.setEnabled(true);
+				ventana.getRootPane().setDefaultButton(btnIniciar);
+				btnIniciar.requestFocus();
 			}
 		});
 		btnParar.setEnabled(false);
