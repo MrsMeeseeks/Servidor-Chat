@@ -11,17 +11,21 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
+import intefaces.Sala;
 import paqueteEnvios.PaqueteMensaje;
+import paqueteEnvios.PaqueteSala;
 import paqueteEnvios.PaqueteUsuario;
 
 import java.awt.TextArea;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.SystemColor;
 import java.awt.Font;
 
@@ -30,7 +34,9 @@ public class Servidor extends Thread {
 	public static ArrayList<String> UsuariosConectados = new ArrayList<String>();
 	private static ArrayList<EscuchaCliente> clientesConectados = new ArrayList<>();
 	public static Map<String, Socket> mapConectados = new HashMap<>();
-	
+	public static ArrayList<String> salasNombresDisponibles = new ArrayList<String>();
+	public static Map<String, PaqueteSala> salas = new HashMap<>();
+
 	private static ServerSocket serverSocket;
 	private final int puerto = 1234;
 	private static Conector conexionDB;
@@ -41,6 +47,7 @@ public class Servidor extends Thread {
 	static boolean estadoServer;
 	
 	public static AtencionConexiones atencionConexiones;
+	public static AtencionNuevasSalas atencionNuevasSalas;
 	
 	public static void main(String[] args) {
 		cargarInterfaz();
@@ -160,8 +167,12 @@ public class Servidor extends Thread {
 			log.append("Servidor esperando conexiones..." + System.lineSeparator());
 			String ipRemota;
 			
+			conexionDB.cargarSalasExistentes();
+				
 			atencionConexiones = new AtencionConexiones();
 			atencionConexiones.start();
+			atencionNuevasSalas = new AtencionNuevasSalas();
+			atencionNuevasSalas.start();
 		
 			while (estadoServer) {
 				Socket cliente = serverSocket.accept();
@@ -204,6 +215,13 @@ public class Servidor extends Thread {
 		SocketsConectados = socketsConectados;
 	}
 
+	public static ArrayList<String> getNombresSalasDisponibles() {
+		return salasNombresDisponibles;
+	}
+
+	public static void setNombresSalasDisponibles(ArrayList<String> salasDisponibles) {
+		Servidor.salasNombresDisponibles = salasDisponibles;
+	}
 	
 	public static boolean mensajeAUsuario(PaqueteMensaje pqm) {
 		boolean result = true;
@@ -247,5 +265,9 @@ public class Servidor extends Thread {
 	
 	public static Conector getConector() {
 		return conexionDB;
+	}
+
+	public static Map<String, PaqueteSala> getSalas() {
+		return salas;
 	}
 }

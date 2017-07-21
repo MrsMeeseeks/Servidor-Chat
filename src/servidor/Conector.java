@@ -8,8 +8,8 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
-
+import intefaces.Sala;
+import paqueteEnvios.PaqueteSala;
 import paqueteEnvios.PaqueteUsuario;
 
 public class Conector {
@@ -89,6 +89,81 @@ public class Conector {
 		}
 
 	}
+	
+	public boolean cargaChatSalas(PaqueteSala salas) {
+		ResultSet result = null;
+		try {
+			PreparedStatement st = connect.prepareStatement("SELECT * FROM Salas WHERE Name = ? AND Chat = ? ");
+			st.setString(1, salas.getName());
+			st.setString(2, salas.getHistorial());
+			result = st.executeQuery();
+
+			if (result.next()) {
+				Servidor.log.append("La Sala " + salas.getName() + " ha cargado el historial de chat correctamente" + System.lineSeparator());
+				return true;
+			}
+			
+			Servidor.log.append("La Sala " + salas.getName() + " ha realizado un intento fallido de carga del historial de chat" + System.lineSeparator());
+			return false;
+
+		} catch (SQLException e) {
+			Servidor.log.append("La Sala " + salas.getName() + " fallo al cargar el historial de chat." + System.lineSeparator());
+			e.printStackTrace();
+			return false;
+		}
+
+	}
+	
+	public boolean registrarSala(PaqueteSala paqueteSala) {
+		ResultSet result = null;
+		try {
+			PreparedStatement st1 = connect.prepareStatement("SELECT * FROM Salas WHERE Name = ? ");
+			st1.setString(1, paqueteSala.getName());
+			result = st1.executeQuery();
+
+			if (!result.next()) {
+
+				PreparedStatement st = connect.prepareStatement("INSERT INTO Salas (Name, Chat) VALUES (?,?)");
+				st.setString(1, paqueteSala.getName());
+				st.setString(2, paqueteSala.getHistorial());
+				st.execute();
+				Servidor.log.append("La sala  " + paqueteSala.getName() + " se ha registrado." + System.lineSeparator());
+				return true;
+			} else {
+				Servidor.log.append("La sala " + paqueteSala.getName() + " ya se existe." + System.lineSeparator());
+				return false;
+			}
+		} catch (SQLException ex) {
+			Servidor.log.append("Eror al intentar registrar la sala " + paqueteSala.getName() + System.lineSeparator());
+			System.err.println(ex.getMessage());
+			return false;
+		}
+	}
+	
+	public boolean guardaChatSalas(PaqueteSala salas) {
+		ResultSet result = null;
+		try {
+			
+			PreparedStatement st = connect.prepareStatement("UPDATE TABLE Salas SET Chat = Chat || ? " + "WHERE Name = ?");
+			st.setString(1, salas.getHistorial());
+			st.setString(2, salas.getName());
+			result = st.executeQuery();
+
+			if (result.next()) {
+				Servidor.log.append("La Sala " + salas.getName() + " se ha actualizado correctamente en la BD" + System.lineSeparator());
+				return true;
+			}
+			
+			Servidor.log.append("La Sala " + salas.getName() + " ha realiado un intento fallido de actualizacion en la BD" + System.lineSeparator());
+			return false;
+
+		} catch (SQLException e) {
+			Servidor.log.append("La Sala " + salas.getName() + " fallo al intentar actualiarze en la BD" + System.lineSeparator());
+			e.printStackTrace();
+			return false;
+		}
+
+	}
 
 	public PaqueteUsuario getUsuario(String usuario) {
 		ResultSet result = null;
@@ -114,4 +189,31 @@ public class Conector {
 		
 		return new PaqueteUsuario();
 	}
+
+	public void cargarSalasExistentes() {
+		ResultSet result = null;
+		PreparedStatement st;
+		
+		try {
+			st = connect.prepareStatement("SELECT COUNT (*) FROM Salas");
+			result = st.executeQuery();
+			int cant = result.getInt(1);
+			st = connect.prepareStatement("SELECT * FROM Salas");
+			result = st.executeQuery();
+			result.next();
+			for (int i = 0; i< cant; i++) {
+				Servidor.getNombresSalasDisponibles().add(result.getString("Name"));
+				Servidor.getSalas().put(result.getString("Name"),new PaqueteSala (result.getString("Name"),result.getString("Chat")));
+				result.next();
+			}
+			Servidor.log.append("Se cargaron las salas existentes en la base de datos con éxito." + System.lineSeparator());
+		} catch (SQLException e) {
+			Servidor.log.append("Error al intentar cargar las salas existentes en la base de datos." + System.lineSeparator());
+			Servidor.log.append(e.getMessage() + System.lineSeparator());
+			e.printStackTrace();
+		}
+		
+	}
+
+	
 }

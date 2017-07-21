@@ -4,7 +4,7 @@ package servidor;
 import com.google.gson.Gson;
 
 import paqueteEnvios.Comando;
-import paqueteEnvios.PaqueteDeUsuarios;
+import paqueteEnvios.PaqueteDeUsuariosYSalas;
 
 public class AtencionConexiones extends Thread {
 
@@ -20,7 +20,7 @@ public class AtencionConexiones extends Thread {
 					// Espero a que se conecte alguien
 					wait();
 					// Le reenvio la conexion a todos
-					PaqueteDeUsuarios pdu = (PaqueteDeUsuarios) new PaqueteDeUsuarios(Servidor.getUsuariosConectados())
+					PaqueteDeUsuariosYSalas pdu = (PaqueteDeUsuariosYSalas) new PaqueteDeUsuariosYSalas(Servidor.getUsuariosConectados(), Servidor.getNombresSalasDisponibles())
 							.clone();
 					pdu.setComando(Comando.CONEXION);
 					String s = gson.toJson(pdu);

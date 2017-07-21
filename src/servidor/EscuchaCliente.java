@@ -9,8 +9,9 @@ import com.google.gson.Gson;
 
 import paqueteEnvios.Comando;
 import paqueteEnvios.Paquete;
-import paqueteEnvios.PaqueteDeUsuarios;
+import paqueteEnvios.PaqueteDeUsuariosYSalas;
 import paqueteEnvios.PaqueteMensaje;
+import paqueteEnvios.PaqueteSala;
 import paqueteEnvios.PaqueteUsuario;
 
 public class EscuchaCliente extends Thread {
@@ -22,7 +23,7 @@ public class EscuchaCliente extends Thread {
 	private final Gson gson = new Gson();
 
 	private PaqueteUsuario paqueteUsuario;
-	private PaqueteDeUsuarios paqueteDeUsuarios;
+	private PaqueteDeUsuariosYSalas paqueteDeUsuarios;
 	private PaqueteMensaje paqueteMensaje;
 
 	public EscuchaCliente(String ip, Socket socket, ObjectInputStream entrada, ObjectOutputStream salida) {
@@ -37,11 +38,12 @@ public class EscuchaCliente extends Thread {
 			Paquete paquete;
 			Paquete paqueteSv = new Paquete(null, 0);
 			PaqueteUsuario paqueteUsuario = new PaqueteUsuario();
+			PaqueteSala paqueteSala = new PaqueteSala();
 
 			String cadenaLeida = (String) entrada.readObject();
 
 			while (!((paquete = gson.fromJson(cadenaLeida, Paquete.class)).getComando() == Comando.DESCONECTAR)) {							
-				
+
 				switch (paquete.getComando()) {
 
 				case Comando.INICIOSESION:
@@ -53,9 +55,9 @@ public class EscuchaCliente extends Thread {
 					// Si se puede loguear el usuario le envio un mensaje de exito y el paquete usuario con los datos
 					if (Servidor.getConector().loguearUsuario(paqueteUsuario)) {
 
-						paqueteUsuario.setListaDeConectados(Servidor.UsuariosConectados);
-						paqueteUsuario.setComando(Comando.INICIOSESION);
-						paqueteUsuario.setMensaje(Paquete.msjExito);
+						PaqueteDeUsuariosYSalas pus = new PaqueteDeUsuariosYSalas(Servidor.getUsuariosConectados(), Servidor.getNombresSalasDisponibles());
+						pus.setComando(Comando.INICIOSESION);
+						pus.setMensaje(Paquete.msjExito);
 
 						Servidor.UsuariosConectados.add(paqueteUsuario.getUsername());
 
@@ -63,7 +65,7 @@ public class EscuchaCliente extends Thread {
 						int index = Servidor.UsuariosConectados.indexOf(paqueteUsuario.getUsername());
 						Servidor.mapConectados.put(paqueteUsuario.getUsername(), Servidor.SocketsConectados.get(index));
 
-						salida.writeObject(gson.toJson(paqueteUsuario));
+						salida.writeObject(gson.toJson(pus));
 
 						// COMO SE CONECTO 1 LE DIGO AL SERVER QUE LE MANDE A TODOS LOS QUE SE CONECTAN
 						synchronized(Servidor.atencionConexiones){
@@ -112,7 +114,7 @@ public class EscuchaCliente extends Thread {
 						}
 					}
 					Servidor.mensajeAAll(count);
-					
+
 					break;
 				case Comando.MP:
 					paqueteMensaje = (PaqueteMensaje) (gson.fromJson(cadenaLeida, PaqueteMensaje.class));
@@ -132,14 +134,29 @@ public class EscuchaCliente extends Thread {
 						System.out.println("Server: Mensaje No Enviado!");
 					}
 					break;
-					
+
+				case Comando.NEWSALA:
+					paqueteSala = (PaqueteSala) (gson.fromJson(cadenaLeida, PaqueteSala.class));
+					if(Servidor.getConector().registrarSala(paqueteSala)){
+						Servidor.getNombresSalasDisponibles().add(paqueteSala.getName());
+						// COMO SE CREO 1 SALA NUEVA LE DIGO AL SERVER QUE LE MANDE A TODOS LOS QUE SE CONECTAN
+						synchronized(Servidor.atencionNuevasSalas){
+							Servidor.atencionNuevasSalas.notify();
+						}
+					} else {
+						paqueteSala.setComando(Comando.NEWSALA);
+						paqueteSala.setMensaje(Paquete.msjFracaso);
+						salida.writeObject(gson.toJson(paqueteSala));
+					}
+
+					break;
 				case Comando.REGISTRO:
 					paqueteUsuario = (PaqueteUsuario) (gson.fromJson(cadenaLeida, PaqueteUsuario.class));
 					if (Servidor.getConector().registrarUsuario(paqueteUsuario)) {
-						
+
 						paqueteUsuario.setComando(Comando.REGISTRO);
 						paqueteUsuario.setMensaje(Paquete.msjExito);
-						
+
 						Servidor.UsuariosConectados.add(paqueteUsuario.getUsername());
 
 						// Consigo el socket, y entonces ahora pongo el username y el socket en el map
@@ -147,7 +164,7 @@ public class EscuchaCliente extends Thread {
 						Servidor.mapConectados.put(paqueteUsuario.getUsername(), Servidor.SocketsConectados.get(index));
 
 						salida.writeObject(gson.toJson(paqueteUsuario));
-						
+
 						// COMO SE CONECTO 1 LE DIGO AL SERVER QUE LE MANDE A TODOS LOS QUE SE CONECTAN
 						synchronized(Servidor.atencionConexiones){
 							Servidor.atencionConexiones.notify();
@@ -158,7 +175,22 @@ public class EscuchaCliente extends Thread {
 						salida.writeObject(gson.toJson(paqueteUsuario));
 					}
 					break;
-
+					
+				case Comando.ENTRARSALA:
+					paqueteSala = (PaqueteSala) (gson.fromJson(cadenaLeida, PaqueteSala.class));
+					paqueteSala.setComando(Comando.ENTRARSALA);
+					if(Servidor.getNombresSalasDisponibles().contains(paqueteSala.getName())) {
+						Servidor.getSalas().get(paqueteSala.getName()).getUsuariosConectados().add(paqueteSala.getCliente());
+						paqueteSala = Servidor.getSalas().get(paqueteSala.getName());
+						paqueteSala.setMensaje(Paquete.msjExito);
+						paqueteSala.setComando(Comando.ENTRARSALA);
+						salida.writeObject(gson.toJson(paqueteSala));
+					} else {
+						paqueteSala.setMensaje(Paquete.msjFracaso);
+						salida.writeObject(gson.toJson(paqueteSala));
+					}
+					break;
+					
 				default:
 					break;
 				}
@@ -182,9 +214,9 @@ public class EscuchaCliente extends Thread {
 			Servidor.getClientesConectados().remove(this);
 
 			for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
-				paqueteDeUsuarios = new PaqueteDeUsuarios(Servidor.getUsuariosConectados());
+				paqueteDeUsuarios = new PaqueteDeUsuariosYSalas(Servidor.getUsuariosConectados());
 				paqueteDeUsuarios.setComando(Comando.CONEXION);
-				conectado.salida.writeObject(gson.toJson(paqueteDeUsuarios, PaqueteDeUsuarios.class));
+				conectado.salida.writeObject(gson.toJson(paqueteDeUsuarios, PaqueteDeUsuariosYSalas.class));
 			}
 
 			Servidor.log.append(paquete.getIp() + " cerró su Sesión " + System.lineSeparator());
