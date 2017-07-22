@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+
+import javax.swing.text.html.HTMLDocument.Iterator;
 
 import com.google.gson.Gson;
 
@@ -37,7 +40,6 @@ public class EscuchaCliente extends Thread {
 		try {
 			Paquete paquete;
 			Paquete paqueteSv = new Paquete(null, 0);
-			PaqueteUsuario paqueteUsuario = new PaqueteUsuario();
 			PaqueteSala paqueteSala = new PaqueteSala();
 
 			String cadenaLeida = (String) entrada.readObject();
@@ -138,7 +140,7 @@ public class EscuchaCliente extends Thread {
 				case Comando.NEWSALA:
 					paqueteSala = (PaqueteSala) (gson.fromJson(cadenaLeida, PaqueteSala.class));
 					if(Servidor.getConector().registrarSala(paqueteSala)){
-						Servidor.getNombresSalasDisponibles().add(paqueteSala.getName());
+						Servidor.getNombresSalasDisponibles().add(paqueteSala.getNombreSala());
 						// COMO SE CREO 1 SALA NUEVA LE DIGO AL SERVER QUE LE MANDE A TODOS LOS QUE SE CONECTAN
 						synchronized(Servidor.atencionNuevasSalas){
 							Servidor.atencionNuevasSalas.notify();
@@ -175,22 +177,28 @@ public class EscuchaCliente extends Thread {
 						salida.writeObject(gson.toJson(paqueteUsuario));
 					}
 					break;
-					
+
 				case Comando.ENTRARSALA:
 					paqueteSala = (PaqueteSala) (gson.fromJson(cadenaLeida, PaqueteSala.class));
 					paqueteSala.setComando(Comando.ENTRARSALA);
-					if(Servidor.getNombresSalasDisponibles().contains(paqueteSala.getName())) {
-						Servidor.getSalas().get(paqueteSala.getName()).getUsuariosConectados().add(paqueteSala.getCliente());
-						paqueteSala = Servidor.getSalas().get(paqueteSala.getName());
+					if(Servidor.getNombresSalasDisponibles().contains(paqueteSala.getNombreSala())) {
+						Servidor.getSalas().get(paqueteSala.getNombreSala()).getUsuariosConectados().add(paqueteSala.getCliente());		
+						paqueteSala = Servidor.getSalas().get(paqueteSala.getNombreSala());
 						paqueteSala.setMensaje(Paquete.msjExito);
 						paqueteSala.setComando(Comando.ENTRARSALA);
 						salida.writeObject(gson.toJson(paqueteSala));
+
+						synchronized(Servidor.atencionConexionesSalas){
+							Servidor.atencionConexionesSalas.setNombreSala(paqueteSala.getNombreSala());
+							Servidor.atencionConexionesSalas.notify();
+						}
 					} else {
 						paqueteSala.setMensaje(Paquete.msjFracaso);
 						salida.writeObject(gson.toJson(paqueteSala));
 					}
+
 					break;
-					
+
 				default:
 					break;
 				}

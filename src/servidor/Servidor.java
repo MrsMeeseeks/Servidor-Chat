@@ -40,19 +40,20 @@ public class Servidor extends Thread {
 	private static ServerSocket serverSocket;
 	private final int puerto = 1234;
 	private static Conector conexionDB;
-	
+
 	private static Thread server;
-	
+
 	static TextArea log = new TextArea();
 	static boolean estadoServer;
-	
+
 	public static AtencionConexiones atencionConexiones;
 	public static AtencionNuevasSalas atencionNuevasSalas;
-	
+	public static AtencionConexionesSalas atencionConexionesSalas;
+
 	public static void main(String[] args) {
 		cargarInterfaz();
 	}
-	
+
 	private static void cargarInterfaz() {
 		JFrame ventana = new JFrame("Servidor del Chat");
 		ventana.setTitle("Servidor");
@@ -72,9 +73,9 @@ public class Servidor extends Thread {
 		log.setBackground(Color.BLACK);
 		log.setForeground(Color.WHITE);
 		log.setEditable(false);
-		
+
 		scrollPane.setRowHeaderView(log);
-		
+
 		final JButton btnIniciar = new JButton();
 		btnIniciar.setForeground(Color.WHITE);
 		btnIniciar.setBounds(32, 23, 165, 23);
@@ -100,7 +101,7 @@ public class Servidor extends Thread {
 		ventana.getContentPane().add(btnIniciar);
 		ventana.getRootPane().setDefaultButton(btnIniciar);
 		btnIniciar.requestFocus();
-		
+
 		btnParar.setText("Parar Servidor");
 		btnParar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -129,7 +130,7 @@ public class Servidor extends Thread {
 		btnParar.setEnabled(false);
 		ventana.getContentPane().add(btnParar);
 		ventana.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		
+
 		ventana.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent evt) {
 				if (serverSocket != null) {
@@ -155,7 +156,7 @@ public class Servidor extends Thread {
 		});
 		ventana.setVisible(true);
 	}
-	
+
 	@Override
 	public void run() {
 		try {
@@ -166,25 +167,27 @@ public class Servidor extends Thread {
 			serverSocket = new ServerSocket(puerto);
 			log.append("Servidor esperando conexiones..." + System.lineSeparator());
 			String ipRemota;
-			
+
 			conexionDB.cargarSalasExistentes();
-				
+
 			atencionConexiones = new AtencionConexiones();
 			atencionConexiones.start();
 			atencionNuevasSalas = new AtencionNuevasSalas();
 			atencionNuevasSalas.start();
-		
+			atencionConexionesSalas = new AtencionConexionesSalas();
+			atencionConexionesSalas.start();
+
 			while (estadoServer) {
 				Socket cliente = serverSocket.accept();
 				//Agrego el Socket a la lista de Sockets
 				SocketsConectados.add(cliente);
-				
+
 				ipRemota = cliente.getInetAddress().getHostAddress();
 				log.append(ipRemota + " se ha conectado" + System.lineSeparator());
 
 				ObjectOutputStream salida = new ObjectOutputStream(cliente.getOutputStream());
 				ObjectInputStream entrada = new ObjectInputStream(cliente.getInputStream());
-				
+
 				EscuchaCliente atencion = new EscuchaCliente(ipRemota, cliente, entrada, salida);
 				atencion.start();
 				clientesConectados.add(atencion);
@@ -194,7 +197,7 @@ public class Servidor extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static ArrayList<EscuchaCliente> getClientesConectados() {
 		return clientesConectados;
 	}
@@ -206,7 +209,7 @@ public class Servidor extends Thread {
 	public static ArrayList<String> getUsuariosConectados() {
 		return UsuariosConectados;
 	}
-	
+
 	public static ArrayList<Socket> getSocketsConectados() {
 		return SocketsConectados;
 	}
@@ -222,7 +225,7 @@ public class Servidor extends Thread {
 	public static void setNombresSalasDisponibles(ArrayList<String> salasDisponibles) {
 		Servidor.salasNombresDisponibles = salasDisponibles;
 	}
-	
+
 	public static boolean mensajeAUsuario(PaqueteMensaje pqm) {
 		boolean result = true;
 		if(!UsuariosConectados.contains(pqm.getUserReceptor())) {
@@ -231,14 +234,14 @@ public class Servidor extends Thread {
 		// Si existe inicio sesion
 		if (result) {
 			Servidor.log.append(pqm.getUserEmisor() + " envió mensaje a " + pqm.getUserReceptor() + System.lineSeparator());
-				return true;
+			return true;
 		} else {
 			// Si no existe informo y devuelvo false
 			Servidor.log.append("El mensaje para " + pqm.getUserReceptor() + " no se ha podido enviar, usario inexistente/desconectado." + System.lineSeparator());
 			return false;
 		}
 	}
-	
+
 	public static boolean mensajeAAll(int contador) {
 		boolean result = true;
 		if(UsuariosConectados.size() != contador+1) {
@@ -247,14 +250,14 @@ public class Servidor extends Thread {
 		// Si existe inicio sesion
 		if (result) {
 			Servidor.log.append("Se ha enviado un mensaje general" + System.lineSeparator());
-				return true;
+			return true;
 		} else {
 			// Si no existe informo y devuelvo false
 			Servidor.log.append("Se ha desconectado un usuario" + System.lineSeparator());
 			return false;
 		}
 	}
-	
+
 	public static Map<String, Socket> getPersonajesConectados() {
 		return mapConectados;
 	}
@@ -262,7 +265,7 @@ public class Servidor extends Thread {
 	public static void setPersonajesConectados(Map<String, Socket> personajesConectados) {
 		Servidor.mapConectados = personajesConectados;
 	}
-	
+
 	public static Conector getConector() {
 		return conexionDB;
 	}

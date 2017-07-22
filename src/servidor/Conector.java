@@ -94,20 +94,20 @@ public class Conector {
 		ResultSet result = null;
 		try {
 			PreparedStatement st = connect.prepareStatement("SELECT * FROM Salas WHERE Name = ? AND Chat = ? ");
-			st.setString(1, salas.getName());
+			st.setString(1, salas.getNombreSala());
 			st.setString(2, salas.getHistorial());
 			result = st.executeQuery();
 
 			if (result.next()) {
-				Servidor.log.append("La Sala " + salas.getName() + " ha cargado el historial de chat correctamente" + System.lineSeparator());
+				Servidor.log.append("La Sala " + salas.getNombreSala() + " ha cargado el historial de chat correctamente" + System.lineSeparator());
 				return true;
 			}
 			
-			Servidor.log.append("La Sala " + salas.getName() + " ha realizado un intento fallido de carga del historial de chat" + System.lineSeparator());
+			Servidor.log.append("La Sala " + salas.getNombreSala() + " ha realizado un intento fallido de carga del historial de chat" + System.lineSeparator());
 			return false;
 
 		} catch (SQLException e) {
-			Servidor.log.append("La Sala " + salas.getName() + " fallo al cargar el historial de chat." + System.lineSeparator());
+			Servidor.log.append("La Sala " + salas.getNombreSala() + " fallo al cargar el historial de chat." + System.lineSeparator());
 			e.printStackTrace();
 			return false;
 		}
@@ -118,23 +118,23 @@ public class Conector {
 		ResultSet result = null;
 		try {
 			PreparedStatement st1 = connect.prepareStatement("SELECT * FROM Salas WHERE Name = ? ");
-			st1.setString(1, paqueteSala.getName());
+			st1.setString(1, paqueteSala.getNombreSala());
 			result = st1.executeQuery();
 
 			if (!result.next()) {
 
 				PreparedStatement st = connect.prepareStatement("INSERT INTO Salas (Name, Chat) VALUES (?,?)");
-				st.setString(1, paqueteSala.getName());
+				st.setString(1, paqueteSala.getNombreSala());
 				st.setString(2, paqueteSala.getHistorial());
 				st.execute();
-				Servidor.log.append("La sala  " + paqueteSala.getName() + " se ha registrado." + System.lineSeparator());
+				Servidor.log.append("La sala  " + paqueteSala.getNombreSala() + " se ha registrado." + System.lineSeparator());
 				return true;
 			} else {
-				Servidor.log.append("La sala " + paqueteSala.getName() + " ya se existe." + System.lineSeparator());
+				Servidor.log.append("La sala " + paqueteSala.getNombreSala() + " ya se existe." + System.lineSeparator());
 				return false;
 			}
 		} catch (SQLException ex) {
-			Servidor.log.append("Eror al intentar registrar la sala " + paqueteSala.getName() + System.lineSeparator());
+			Servidor.log.append("Eror al intentar registrar la sala " + paqueteSala.getNombreSala() + System.lineSeparator());
 			System.err.println(ex.getMessage());
 			return false;
 		}
@@ -146,19 +146,19 @@ public class Conector {
 			
 			PreparedStatement st = connect.prepareStatement("UPDATE TABLE Salas SET Chat = Chat || ? " + "WHERE Name = ?");
 			st.setString(1, salas.getHistorial());
-			st.setString(2, salas.getName());
+			st.setString(2, salas.getNombreSala());
 			result = st.executeQuery();
 
 			if (result.next()) {
-				Servidor.log.append("La Sala " + salas.getName() + " se ha actualizado correctamente en la BD" + System.lineSeparator());
+				Servidor.log.append("La Sala " + salas.getNombreSala() + " se ha actualizado correctamente en la BD" + System.lineSeparator());
 				return true;
 			}
 			
-			Servidor.log.append("La Sala " + salas.getName() + " ha realiado un intento fallido de actualizacion en la BD" + System.lineSeparator());
+			Servidor.log.append("La Sala " + salas.getNombreSala() + " ha realiado un intento fallido de actualizacion en la BD" + System.lineSeparator());
 			return false;
 
 		} catch (SQLException e) {
-			Servidor.log.append("La Sala " + salas.getName() + " fallo al intentar actualiarze en la BD" + System.lineSeparator());
+			Servidor.log.append("La Sala " + salas.getNombreSala() + " fallo al intentar actualiarze en la BD" + System.lineSeparator());
 			e.printStackTrace();
 			return false;
 		}
