@@ -3,7 +3,6 @@ package servidor;
 import com.google.gson.Gson;
 
 import paqueteEnvios.Comando;
-import paqueteEnvios.PaqueteDeSalas;
 import paqueteEnvios.PaqueteSala;
 
 public class AtencionConexionesSalas extends Thread {

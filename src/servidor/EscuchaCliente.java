@@ -14,6 +14,7 @@ import paqueteEnvios.Comando;
 import paqueteEnvios.Paquete;
 import paqueteEnvios.PaqueteDeUsuariosYSalas;
 import paqueteEnvios.PaqueteMensaje;
+import paqueteEnvios.PaqueteMensajeSala;
 import paqueteEnvios.PaqueteSala;
 import paqueteEnvios.PaqueteUsuario;
 
@@ -28,6 +29,7 @@ public class EscuchaCliente extends Thread {
 	private PaqueteUsuario paqueteUsuario;
 	private PaqueteDeUsuariosYSalas paqueteDeUsuarios;
 	private PaqueteMensaje paqueteMensaje;
+	private PaqueteMensajeSala paqueteMensajeSala;
 
 	public EscuchaCliente(String ip, Socket socket, ObjectInputStream entrada, ObjectOutputStream salida) {
 		this.socket = socket;
@@ -97,11 +99,25 @@ public class EscuchaCliente extends Thread {
 								conectado.getSalida().writeObject(gson.toJson(paqueteMensaje));	
 							}
 						}
-
 					} else {
 						System.out.println("Server: Mensaje No Enviado!");
 					}
 					break;
+
+				case Comando.CHATSALA:
+					paqueteMensajeSala = (PaqueteMensajeSala) (gson.fromJson(cadenaLeida, PaqueteMensajeSala.class));
+					paqueteMensajeSala.setComando(Comando.CHATSALA);
+
+					int count1 = 0;
+					Socket s2 = Servidor.mapConectados.get(paqueteMensajeSala.getUserEmisor());
+					for(EscuchaCliente conectado : Servidor.getClientesConectados()){
+						if(paqueteMensajeSala.getUsersDestino().contains(conectado.getPaqueteUsuario().getUsername()) && conectado.getSocket() != s2){
+							conectado.getSalida().writeObject(gson.toJson(paqueteMensajeSala));
+							count1++;
+						}
+					}
+					Servidor.mensajeSala(count1);
+					break;	
 
 				case Comando.CHATALL:
 					paqueteMensaje = (PaqueteMensaje) (gson.fromJson(cadenaLeida, PaqueteMensaje.class));
@@ -118,6 +134,7 @@ public class EscuchaCliente extends Thread {
 					Servidor.mensajeAAll(count);
 
 					break;
+
 				case Comando.MP:
 					paqueteMensaje = (PaqueteMensaje) (gson.fromJson(cadenaLeida, PaqueteMensaje.class));
 					if (Servidor.mensajeAUsuario(paqueteMensaje)) {

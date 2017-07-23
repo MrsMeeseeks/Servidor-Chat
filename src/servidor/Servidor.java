@@ -273,4 +273,21 @@ public class Servidor extends Thread {
 	public static Map<String, PaqueteSala> getSalas() {
 		return salas;
 	}
+
+	public static boolean mensajeSala(int contador) {
+		boolean result = true;
+		if(UsuariosConectados.size() != contador+1) {
+			result = false;
+		}
+		// Si existe inicio sesion
+		if (result) {
+			Servidor.log.append("Se ha enviado un mensaje por sala" + System.lineSeparator());
+			return true;
+		} else {
+			// Si no existe informo y devuelvo false
+			Servidor.log.append("Se ha desconectado un usuario" + System.lineSeparator());
+			return false;
+		}
+		
+	}
 }
