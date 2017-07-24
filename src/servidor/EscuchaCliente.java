@@ -229,6 +229,7 @@ public class EscuchaCliente extends Thread {
 					}
 					break;
 
+					
 				case Comando.ENTRARSALA:
 					paqueteSala = (PaqueteSala) (gson.fromJson(cadenaLeida, PaqueteSala.class));
 					paqueteSala.setComando(Comando.ENTRARSALA);
