@@ -109,7 +109,7 @@ public class EscuchaCliente extends Thread {
 					paqueteMencion = (PaqueteMencion) (gson.fromJson(cadenaLeida, PaqueteMencion.class));
 					if (Servidor.mencionUsuario(paqueteMencion)) {
 						paqueteMencion.setComando(Comando.MENCIONSALA);
-						
+
 						int count1 = 0;
 						Socket s2 = Servidor.mapConectados.get(paqueteMencion.getUserEmisor());
 						for(EscuchaCliente conectado : Servidor.getClientesConectados()){
@@ -119,13 +119,17 @@ public class EscuchaCliente extends Thread {
 								count1++;
 							}
 						}
-						
-						Servidor.getSalas().get(paqueteMensajeSala.getNombreSala()).getHistorial().concat(paqueteMensajeSala.getUserEmisor() + ": " + paqueteMensajeSala.getMsj() + "\n");
-						Servidor.getConector().guardarChatSala(paqueteMensajeSala);
-//						
-//						if(Servidor.getConector().guardarChatSala(paq)){
-//							Servidor.mensajeSala(count1);
-//						}
+						if(!paqueteMencion.getMsj().equals("") && paqueteMencion.getMsj() != null)
+							Servidor.getSalas().get(paqueteMencion.getNombreSala()).getHistorial().concat(paqueteMencion.getUserEmisor() + ": " + paqueteMencion.getMsj() + "\n");
+						else
+							Servidor.getSalas().get(paqueteMencion.getNombreSala()).getHistorial().concat(paqueteMencion.getUserEmisor() + "\n");
+
+						PaqueteMensajeSala paq = new PaqueteMensajeSala();
+						paq.setMsj(paqueteMencion.getMsj());
+						paq.setUserEmisor(paqueteMencion.getUserEmisor());
+						paq.setNombreSala(paqueteMencion.getNombreSala());
+						Servidor.getConector().guardarChatSala(paq);
+
 					}
 					break;		
 
@@ -142,14 +146,15 @@ public class EscuchaCliente extends Thread {
 							count1++;
 						}
 					}
-					
-					Servidor.getSalas().get(paqueteMensajeSala.getNombreSala()).getHistorial().concat(paqueteMensajeSala.getUserEmisor() + ": " + paqueteMensajeSala.getMsj() + "\n");
-					
+
+
+					if(!paqueteMensajeSala.getMsj().equals("") && paqueteMensajeSala.getMsj() != null)
+						Servidor.getSalas().get(paqueteMensajeSala.getNombreSala()).getHistorial().concat(paqueteMensajeSala.getUserEmisor() + ": " + paqueteMensajeSala.getMsj() + "\n");
+					else
+						Servidor.getSalas().get(paqueteMensajeSala.getNombreSala()).getHistorial().concat(paqueteMensajeSala.getUserEmisor() + "\n");	
+
 					Servidor.getConector().guardarChatSala(paqueteMensajeSala);
-					
-//					if(Servidor.getConector().guardarChatSala(paq)){
-//						Servidor.mensajeSala(count1);
-//					}
+
 					break;
 
 				case Comando.CHATALL:
@@ -229,7 +234,7 @@ public class EscuchaCliente extends Thread {
 					}
 					break;
 
-					
+
 				case Comando.ENTRARSALA:
 					paqueteSala = (PaqueteSala) (gson.fromJson(cadenaLeida, PaqueteSala.class));
 					paqueteSala.setComando(Comando.ENTRARSALA);
@@ -238,17 +243,17 @@ public class EscuchaCliente extends Thread {
 						paqueteSala = Servidor.getSalas().get(paqueteSala.getNombreSala());
 						paqueteSala.setMsj(Paquete.msjExito);
 						paqueteSala.setComando(Comando.ENTRARSALA);
-						
+
 						if(Servidor.getConector().cargarChatSalas(paqueteSala)){
 							salida.writeObject(gson.toJson(paqueteSala));
-							
+
 							synchronized(Servidor.atencionConexionesSalas){
 								Servidor.atencionConexionesSalas.setNombreSala(paqueteSala.getNombreSala());
 								Servidor.atencionConexionesSalas.notify();
 							}
 						}
-						
-						
+
+
 					} else {
 						paqueteSala.setMsj(Paquete.msjFracaso);
 						int index = Servidor.UsuariosConectados.indexOf(paqueteUsuario.getUsername());
@@ -260,11 +265,11 @@ public class EscuchaCliente extends Thread {
 					break;
 
 				case Comando.ELIMINARSALA:
-					
+
 					paqueteSala = (PaqueteSala) (gson.fromJson(cadenaLeida, PaqueteSala.class));
 
 					if(Servidor.getConector().eliminarSala(paqueteSala)){
-						
+
 						// COMO SE ELIMINO LA SALA LE INFORMO A LOS QUE ESTABAN CONECTADOS
 						Servidor.getNombresSalasDisponibles().remove(paqueteSala.getNombreSala());
 						Servidor.getSalas().remove(paqueteSala.getNombreSala());
@@ -277,7 +282,7 @@ public class EscuchaCliente extends Thread {
 					} else {
 						paqueteSala.setComando(Comando.ELIMINARSALA);
 						paqueteSala.setMsj(Paquete.msjFracaso);
-						
+
 					}
 
 					break;
