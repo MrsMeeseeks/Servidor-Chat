@@ -35,6 +35,7 @@ public class Servidor extends Thread {
 	public static ArrayList<String> UsuariosConectados = new ArrayList<String>();
 	private static ArrayList<EscuchaCliente> clientesConectados = new ArrayList<>();
 	public static Map<String, Socket> mapConectados = new HashMap<>();
+	
 	public static ArrayList<String> salasNombresDisponibles = new ArrayList<String>();
 	public static Map<String, PaqueteSala> salas = new HashMap<>();
 

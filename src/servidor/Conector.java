@@ -149,7 +149,7 @@ public class Conector {
 			Servidor.log.append("La sala  " + paqueteSala.getNombreSala() + " ha sido eliminada." + System.lineSeparator());
 			return true;
 		} catch (SQLException ex) {
-			Servidor.log.append("Eror al intentar Eliminar la sala " + paqueteSala.getNombreSala() + System.lineSeparator());
+			Servidor.log.append("Eror al intentar eliminar la sala " + paqueteSala.getNombreSala() + System.lineSeparator());
 			System.err.println(ex.getMessage());
 			return false;
 		}

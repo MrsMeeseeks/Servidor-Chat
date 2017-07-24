@@ -251,6 +251,9 @@ public class EscuchaCliente extends Thread {
 						
 					} else {
 						paqueteSala.setMsj(Paquete.msjFracaso);
+						int index = Servidor.UsuariosConectados.indexOf(paqueteUsuario.getUsername());
+						Socket skCli = Servidor.SocketsConectados.get(index); 
+						ObjectOutputStream sal = new ObjectOutputStream(skCli.getOutputStream());
 						salida.writeObject(gson.toJson(paqueteSala));
 					}
 
@@ -259,18 +262,22 @@ public class EscuchaCliente extends Thread {
 				case Comando.ELIMINARSALA:
 					
 					paqueteSala = (PaqueteSala) (gson.fromJson(cadenaLeida, PaqueteSala.class));
-					// COMO SE ELIMINO 1 SALA LE DIGO AL SERVER QUE LE MANDE A TODOS LOS QUE SE CONECTAN
+
 					if(Servidor.getConector().eliminarSala(paqueteSala)){
+						
+						// COMO SE ELIMINO LA SALA LE INFORMO A LOS QUE ESTABAN CONECTADOS
 						Servidor.getNombresSalasDisponibles().remove(paqueteSala.getNombreSala());
+						Servidor.getSalas().remove(paqueteSala.getNombreSala());
 						paqueteSala.setComando(Comando.ELIMINARSALA);
-//						// COMO SE ELIMINO 1 SALA LE DIGO AL SERVER QUE LE MANDE A TODOS LOS QUE SE CONECTAN
-						//synchronized(Servidor.atencionNuevasSalas){
-						//	Servidor.atencionNuevasSalas.notify();
-						//}
+						paqueteSala.setMsj(Paquete.msjExito);
+						for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
+							conectado.getSalida().writeObject(gson.toJson(paqueteSala));
+						}
+						break;
 					} else {
 						paqueteSala.setComando(Comando.ELIMINARSALA);
 						paqueteSala.setMsj(Paquete.msjFracaso);
-						salida.writeObject(gson.toJson(paqueteSala));
+						
 					}
 
 					break;
