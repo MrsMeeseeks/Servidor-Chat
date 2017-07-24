@@ -19,6 +19,7 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
 import intefaces.Sala;
+import paqueteEnvios.PaqueteMencion;
 import paqueteEnvios.PaqueteMensaje;
 import paqueteEnvios.PaqueteSala;
 import paqueteEnvios.PaqueteUsuario;
@@ -238,6 +239,22 @@ public class Servidor extends Thread {
 		} else {
 			// Si no existe informo y devuelvo false
 			Servidor.log.append("El mensaje para " + pqm.getUserReceptor() + " no se ha podido enviar, usario inexistente/desconectado." + System.lineSeparator());
+			return false;
+		}
+	}
+	
+	public static boolean mencionUsuario(PaqueteMencion pqm) {
+		boolean result = true;
+		if(!UsuariosConectados.contains(pqm.getUserReceptor())) {
+			result = false;
+		}
+		// Si existe inicio sesion
+		if (result) {
+			Servidor.log.append(pqm.getUserEmisor() + " mencionó " + pqm.getUserReceptor() + System.lineSeparator());
+			return true;
+		} else {
+			// Si no existe informo y devuelvo false
+			Servidor.log.append("La mención para el usuario " + pqm.getUserReceptor() + " no se ha podido enviar, usario inexistente/desconectado." + System.lineSeparator());
 			return false;
 		}
 	}

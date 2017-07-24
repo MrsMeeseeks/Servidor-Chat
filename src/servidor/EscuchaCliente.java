@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import paqueteEnvios.Comando;
 import paqueteEnvios.Paquete;
 import paqueteEnvios.PaqueteDeUsuariosYSalas;
+import paqueteEnvios.PaqueteMencion;
 import paqueteEnvios.PaqueteMensaje;
 import paqueteEnvios.PaqueteMensajeSala;
 import paqueteEnvios.PaqueteSala;
@@ -30,6 +31,7 @@ public class EscuchaCliente extends Thread {
 	private PaqueteDeUsuariosYSalas paqueteDeUsuarios;
 	private PaqueteMensaje paqueteMensaje;
 	private PaqueteMensajeSala paqueteMensajeSala;
+	private PaqueteMencion paqueteMencion;
 
 	public EscuchaCliente(String ip, Socket socket, ObjectInputStream entrada, ObjectOutputStream salida) {
 		this.socket = socket;
@@ -61,7 +63,7 @@ public class EscuchaCliente extends Thread {
 
 						PaqueteDeUsuariosYSalas pus = new PaqueteDeUsuariosYSalas(Servidor.getUsuariosConectados(), Servidor.getNombresSalasDisponibles());
 						pus.setComando(Comando.INICIOSESION);
-						pus.setMensaje(Paquete.msjExito);
+						pus.setMsj(Paquete.msjExito);
 
 						Servidor.UsuariosConectados.add(paqueteUsuario.getUsername());
 
@@ -78,7 +80,7 @@ public class EscuchaCliente extends Thread {
 						break;
 
 					} else {
-						paqueteSv.setMensaje(Paquete.msjFracaso);
+						paqueteSv.setMsj(Paquete.msjFracaso);
 						salida.writeObject(gson.toJson(paqueteSv));
 						synchronized (this) {
 							this.wait(200);
@@ -104,6 +106,24 @@ public class EscuchaCliente extends Thread {
 					}
 					break;
 
+				case Comando.MENCIONSALA:
+					paqueteMencion = (PaqueteMencion) (gson.fromJson(cadenaLeida, PaqueteMencion.class));
+					if (Servidor.mencionUsuario(paqueteMencion)) {
+						paqueteMencion.setComando(Comando.MENCIONSALA);
+						
+						int count1 = 0;
+						Socket s2 = Servidor.mapConectados.get(paqueteMencion.getUserEmisor());
+						for(EscuchaCliente conectado : Servidor.getClientesConectados()){
+							if(Servidor.getSalas().get(paqueteMencion.getNombreSala()).getUsuariosConectados().contains(conectado.getPaqueteUsuario().getUsername()) 
+									&& conectado.getSocket() != s2){
+								conectado.getSalida().writeObject(gson.toJson(paqueteMencion));
+								count1++;
+							}
+						}
+						Servidor.mensajeSala(count1);
+					}
+					break;		
+
 				case Comando.CHATSALA:
 					paqueteMensajeSala = (PaqueteMensajeSala) (gson.fromJson(cadenaLeida, PaqueteMensajeSala.class));
 					paqueteMensajeSala.setComando(Comando.CHATSALA);
@@ -111,7 +131,8 @@ public class EscuchaCliente extends Thread {
 					int count1 = 0;
 					Socket s2 = Servidor.mapConectados.get(paqueteMensajeSala.getUserEmisor());
 					for(EscuchaCliente conectado : Servidor.getClientesConectados()){
-						if(paqueteMensajeSala.getUsersDestino().contains(conectado.getPaqueteUsuario().getUsername()) && conectado.getSocket() != s2){
+						if(Servidor.getSalas().get(paqueteMensajeSala.getNombreSala()).getUsuariosConectados().contains(conectado.getPaqueteUsuario().getUsername()) 
+								&& conectado.getSocket() != s2){
 							conectado.getSalida().writeObject(gson.toJson(paqueteMensajeSala));
 							count1++;
 						}
@@ -158,13 +179,14 @@ public class EscuchaCliente extends Thread {
 					paqueteSala = (PaqueteSala) (gson.fromJson(cadenaLeida, PaqueteSala.class));
 					if(Servidor.getConector().registrarSala(paqueteSala)){
 						Servidor.getNombresSalasDisponibles().add(paqueteSala.getNombreSala());
+						Servidor.getSalas().put(paqueteSala.getNombreSala(),paqueteSala);
 						// COMO SE CREO 1 SALA NUEVA LE DIGO AL SERVER QUE LE MANDE A TODOS LOS QUE SE CONECTAN
 						synchronized(Servidor.atencionNuevasSalas){
 							Servidor.atencionNuevasSalas.notify();
 						}
 					} else {
 						paqueteSala.setComando(Comando.NEWSALA);
-						paqueteSala.setMensaje(Paquete.msjFracaso);
+						paqueteSala.setMsj(Paquete.msjFracaso);
 						salida.writeObject(gson.toJson(paqueteSala));
 					}
 
@@ -174,7 +196,7 @@ public class EscuchaCliente extends Thread {
 					if (Servidor.getConector().registrarUsuario(paqueteUsuario)) {
 
 						paqueteUsuario.setComando(Comando.REGISTRO);
-						paqueteUsuario.setMensaje(Paquete.msjExito);
+						paqueteUsuario.setMsj(Paquete.msjExito);
 
 						Servidor.UsuariosConectados.add(paqueteUsuario.getUsername());
 
@@ -190,7 +212,7 @@ public class EscuchaCliente extends Thread {
 						}
 						// Si el usuario no se pudo registrar le envio un msj de fracaso
 					} else {
-						paqueteUsuario.setMensaje(Paquete.msjFracaso);
+						paqueteUsuario.setMsj(Paquete.msjFracaso);
 						salida.writeObject(gson.toJson(paqueteUsuario));
 					}
 					break;
@@ -201,7 +223,7 @@ public class EscuchaCliente extends Thread {
 					if(Servidor.getNombresSalasDisponibles().contains(paqueteSala.getNombreSala())) {
 						Servidor.getSalas().get(paqueteSala.getNombreSala()).getUsuariosConectados().add(paqueteSala.getCliente());		
 						paqueteSala = Servidor.getSalas().get(paqueteSala.getNombreSala());
-						paqueteSala.setMensaje(Paquete.msjExito);
+						paqueteSala.setMsj(Paquete.msjExito);
 						paqueteSala.setComando(Comando.ENTRARSALA);
 						salida.writeObject(gson.toJson(paqueteSala));
 
@@ -210,7 +232,7 @@ public class EscuchaCliente extends Thread {
 							Servidor.atencionConexionesSalas.notify();
 						}
 					} else {
-						paqueteSala.setMensaje(Paquete.msjFracaso);
+						paqueteSala.setMsj(Paquete.msjFracaso);
 						salida.writeObject(gson.toJson(paqueteSala));
 					}
 

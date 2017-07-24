@@ -24,7 +24,7 @@ public class AtencionNuevasSalas extends Thread {
 					PaqueteDeSalas ps = (PaqueteDeSalas) new PaqueteDeSalas(Servidor.getNombresSalasDisponibles())
 							.clone();
 					ps.setComando(Comando.NEWSALA);
-					ps.setMensaje(Paquete.msjExito);
+					ps.setMsj(Paquete.msjExito);
 					String s = gson.toJson(ps);
 					for (EscuchaCliente conectado : Servidor.getClientesConectados())
 						if (conectado.getPaqueteUsuario().getEstado())
