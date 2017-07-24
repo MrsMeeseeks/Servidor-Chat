@@ -99,6 +99,8 @@ public class Servidor extends Thread {
 				btnIniciar.requestFocus();
 			}
 		});
+		
+		//commieteando
 
 		ventana.getContentPane().add(btnIniciar);
 		ventana.getRootPane().setDefaultButton(btnIniciar);
