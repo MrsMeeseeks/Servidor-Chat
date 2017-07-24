@@ -90,13 +90,14 @@ public class Conector {
 
 	}
 	
-	public boolean cargaChatSalas(PaqueteSala salas) {
+	public boolean cargarChatSalas(PaqueteSala salas) {
 		ResultSet result = null;
 		try {
-			PreparedStatement st = connect.prepareStatement("SELECT * FROM Salas WHERE Name = ? AND Chat = ? ");
+			PreparedStatement st = connect.prepareStatement("SELECT * FROM Salas WHERE Name = ?");
 			st.setString(1, salas.getNombreSala());
-			st.setString(2, salas.getHistorial());
 			result = st.executeQuery();
+			
+			salas.setTexto(result.getString("Chat"));
 
 			if (result.next()) {
 				Servidor.log.append("La Sala " + salas.getNombreSala() + " ha cargado el historial de chat correctamente" + System.lineSeparator());
@@ -154,22 +155,14 @@ public class Conector {
 		}
 	}
 	
-	public boolean guardaChatSalas(PaqueteSala salas) {
-		ResultSet result = null;
+	public boolean guardarChatSala(PaqueteSala salas) {
+		//ResultSet result = null;
 		try {
-			
-			PreparedStatement st = connect.prepareStatement("UPDATE TABLE Salas SET Chat = Chat || ? " + "WHERE Name = ?");
-			st.setString(1, salas.getHistorial());
+			PreparedStatement st = connect.prepareStatement("UPDATE Salas SET Chat = Chat || ? WHERE Name = ?");
+			st.setString(1, salas.getTexto());
 			st.setString(2, salas.getNombreSala());
-			result = st.executeQuery();
-
-			if (result.next()) {
-				Servidor.log.append("La Sala " + salas.getNombreSala() + " se ha actualizado correctamente en la BD" + System.lineSeparator());
-				return true;
-			}
-			
-			Servidor.log.append("La Sala " + salas.getNombreSala() + " ha realiado un intento fallido de actualizacion en la BD" + System.lineSeparator());
-			return false;
+			st.executeUpdate();
+			return true;
 
 		} catch (SQLException e) {
 			Servidor.log.append("La Sala " + salas.getNombreSala() + " fallo al intentar actualiarze en la BD" + System.lineSeparator());

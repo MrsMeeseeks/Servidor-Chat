@@ -119,7 +119,13 @@ public class EscuchaCliente extends Thread {
 								count1++;
 							}
 						}
-						Servidor.mensajeSala(count1);
+						PaqueteSala paq = new PaqueteSala();
+						paq.setTexto(paqueteMensajeSala.getUserEmisor() + ": " + paqueteMensajeSala.getMsj() + "\n");
+						paq.setNombreSala(paqueteMensajeSala.getNombreSala());
+						
+						if(Servidor.getConector().guardarChatSala(paq)){
+							Servidor.mensajeSala(count1);
+						}
 					}
 					break;		
 
@@ -136,8 +142,15 @@ public class EscuchaCliente extends Thread {
 							count1++;
 						}
 					}
-					Servidor.mensajeSala(count1);
-					break;	
+					
+					PaqueteSala paq = new PaqueteSala();
+					paq.setTexto(paqueteMensajeSala.getUserEmisor() + ": " + paqueteMensajeSala.getMsj() + "\n");
+					paq.setNombreSala(paqueteMensajeSala.getNombreSala());
+					
+					if(Servidor.getConector().guardarChatSala(paq)){
+						Servidor.mensajeSala(count1);
+					}
+					break;
 
 				case Comando.CHATALL:
 					paqueteMensaje = (PaqueteMensaje) (gson.fromJson(cadenaLeida, PaqueteMensaje.class));
@@ -226,10 +239,15 @@ public class EscuchaCliente extends Thread {
 						paqueteSala.setComando(Comando.ENTRARSALA);
 						salida.writeObject(gson.toJson(paqueteSala));
 
-						synchronized(Servidor.atencionConexionesSalas){
-							Servidor.atencionConexionesSalas.setNombreSala(paqueteSala.getNombreSala());
-							Servidor.atencionConexionesSalas.notify();
+						if(Servidor.getConector().cargarChatSalas(paqueteSala)){
+							salida.writeObject(gson.toJson(paqueteSala));
+							
+							synchronized(Servidor.atencionConexionesSalas){
+								Servidor.atencionConexionesSalas.setNombreSala(paqueteSala.getNombreSala());
+								Servidor.atencionConexionesSalas.notify();
+							}
 						}
+						
 					} else {
 						paqueteSala.setMsj(Paquete.msjFracaso);
 						salida.writeObject(gson.toJson(paqueteSala));
