@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import intefaces.Sala;
+import paqueteEnvios.PaqueteMensajeSala;
 import paqueteEnvios.PaqueteSala;
 import paqueteEnvios.PaqueteUsuario;
 
@@ -155,17 +156,16 @@ public class Conector {
 		}
 	}
 	
-	public boolean guardarChatSala(PaqueteSala salas) {
-		//ResultSet result = null;
+	public boolean guardarChatSala(PaqueteMensajeSala msjSalas) {
 		try {
 			PreparedStatement st = connect.prepareStatement("UPDATE Salas SET Chat = Chat || ? WHERE Name = ?");
-			st.setString(1, salas.getTexto());
-			st.setString(2, salas.getNombreSala());
+			st.setString(1, msjSalas.getUserEmisor() + ": " + msjSalas.getMsj() + "\n");
+			st.setString(2, msjSalas.getNombreSala());
 			st.executeUpdate();
 			return true;
 
 		} catch (SQLException e) {
-			Servidor.log.append("La Sala " + salas.getNombreSala() + " fallo al intentar actualiarze en la BD" + System.lineSeparator());
+			Servidor.log.append("La Sala " + msjSalas.getNombreSala() + " fallo al intentar actualiarze en la BD" + System.lineSeparator());
 			e.printStackTrace();
 			return false;
 		}

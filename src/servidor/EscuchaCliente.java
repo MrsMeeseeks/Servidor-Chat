@@ -119,13 +119,13 @@ public class EscuchaCliente extends Thread {
 								count1++;
 							}
 						}
-						PaqueteSala paq = new PaqueteSala();
-						paq.setTexto(paqueteMensajeSala.getUserEmisor() + ": " + paqueteMensajeSala.getMsj() + "\n");
-						paq.setNombreSala(paqueteMensajeSala.getNombreSala());
 						
-						if(Servidor.getConector().guardarChatSala(paq)){
-							Servidor.mensajeSala(count1);
-						}
+						Servidor.getSalas().get(paqueteMensajeSala.getNombreSala()).getHistorial().concat(paqueteMensajeSala.getUserEmisor() + ": " + paqueteMensajeSala.getMsj() + "\n");
+						Servidor.getConector().guardarChatSala(paqueteMensajeSala);
+//						
+//						if(Servidor.getConector().guardarChatSala(paq)){
+//							Servidor.mensajeSala(count1);
+//						}
 					}
 					break;		
 
@@ -143,13 +143,13 @@ public class EscuchaCliente extends Thread {
 						}
 					}
 					
-					PaqueteSala paq = new PaqueteSala();
-					paq.setTexto(paqueteMensajeSala.getUserEmisor() + ": " + paqueteMensajeSala.getMsj() + "\n");
-					paq.setNombreSala(paqueteMensajeSala.getNombreSala());
+					Servidor.getSalas().get(paqueteMensajeSala.getNombreSala()).getHistorial().concat(paqueteMensajeSala.getUserEmisor() + ": " + paqueteMensajeSala.getMsj() + "\n");
 					
-					if(Servidor.getConector().guardarChatSala(paq)){
-						Servidor.mensajeSala(count1);
-					}
+					Servidor.getConector().guardarChatSala(paqueteMensajeSala);
+					
+//					if(Servidor.getConector().guardarChatSala(paq)){
+//						Servidor.mensajeSala(count1);
+//					}
 					break;
 
 				case Comando.CHATALL:
