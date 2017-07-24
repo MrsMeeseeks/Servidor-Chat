@@ -51,7 +51,6 @@ public class EscuchaCliente extends Thread {
 			while (!((paquete = gson.fromJson(cadenaLeida, Paquete.class)).getComando() == Comando.DESCONECTAR)) {							
 
 				switch (paquete.getComando()) {
-
 				case Comando.INICIOSESION:
 					paqueteSv.setComando(Comando.INICIOSESION);
 
@@ -238,6 +237,23 @@ public class EscuchaCliente extends Thread {
 
 					break;
 
+				case Comando.ELIMINARSALA:
+					
+					paqueteSala = (PaqueteSala) (gson.fromJson(cadenaLeida, PaqueteSala.class));
+					// COMO SE ELIMINO 1 SALA LE DIGO AL SERVER QUE LE MANDE A TODOS LOS QUE SE CONECTAN
+					if(Servidor.getConector().eliminarSala(paqueteSala)){
+						Servidor.getNombresSalasDisponibles().remove(paqueteSala.getNombreSala());
+//						// COMO SE ELIMINO 1 SALA LE DIGO AL SERVER QUE LE MANDE A TODOS LOS QUE SE CONECTAN
+						synchronized(Servidor.atencionNuevasSalas){
+							Servidor.atencionNuevasSalas.notify();
+						}
+					} else {
+						paqueteSala.setComando(Comando.ELIMINARSALA);
+						paqueteSala.setMsj(Paquete.msjFracaso);
+						salida.writeObject(gson.toJson(paqueteSala));
+					}
+
+					break;
 				default:
 					break;
 				}

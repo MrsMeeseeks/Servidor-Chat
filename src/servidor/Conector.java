@@ -140,6 +140,20 @@ public class Conector {
 		}
 	}
 	
+	public boolean eliminarSala(PaqueteSala paqueteSala) {
+		try {
+			PreparedStatement st = connect.prepareStatement("DELETE FROM Salas WHERE Name = ? ");
+			st.setString(1, paqueteSala.getNombreSala());
+			st.execute();
+			Servidor.log.append("La sala  " + paqueteSala.getNombreSala() + " ha sido eliminada." + System.lineSeparator());
+			return true;
+		} catch (SQLException ex) {
+			Servidor.log.append("Eror al intentar Eliminar la sala " + paqueteSala.getNombreSala() + System.lineSeparator());
+			System.err.println(ex.getMessage());
+			return false;
+		}
+	}
+	
 	public boolean guardaChatSalas(PaqueteSala salas) {
 		ResultSet result = null;
 		try {
