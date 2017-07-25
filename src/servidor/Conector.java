@@ -99,6 +99,7 @@ public class Conector {
 			result = st.executeQuery();
 			
 			salas.setTexto(result.getString("Chat"));
+			salas.setOwnerSala(result.getString("Owner"));
 
 			if (result.next()) {
 				Servidor.log.append("La Sala " + salas.getNombreSala() + " ha cargado el historial de chat correctamente" + System.lineSeparator());
@@ -125,9 +126,10 @@ public class Conector {
 
 			if (!result.next()) {
 
-				PreparedStatement st = connect.prepareStatement("INSERT INTO Salas (Name, Chat) VALUES (?,?)");
+				PreparedStatement st = connect.prepareStatement("INSERT INTO Salas (Name, Chat, Owner) VALUES (?,?,?)");
 				st.setString(1, paqueteSala.getNombreSala());
 				st.setString(2, paqueteSala.getHistorial());
+				st.setString(3, paqueteSala.getOwnerSala());
 				st.execute();
 				Servidor.log.append("La sala  " + paqueteSala.getNombreSala() + " se ha registrado." + System.lineSeparator());
 				return true;
@@ -208,9 +210,10 @@ public class Conector {
 			st = connect.prepareStatement("SELECT * FROM Salas");
 			result = st.executeQuery();
 			result.next();
+
 			for (int i = 0; i< cant; i++) {
 				Servidor.getNombresSalasDisponibles().add(result.getString("Name"));
-				Servidor.getSalas().put(result.getString("Name"),new PaqueteSala (result.getString("Name"),result.getString("Chat")));
+				Servidor.getSalas().put(result.getString("Name"),new PaqueteSala (result.getString("Name"),result.getString("Chat"),result.getString("Owner")));
 				result.next();
 			}
 			Servidor.log.append("Se cargaron las salas existentes en la base de datos con éxito." + System.lineSeparator());

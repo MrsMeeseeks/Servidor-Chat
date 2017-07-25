@@ -147,12 +147,7 @@ public class EscuchaCliente extends Thread {
 						}
 					}
 
-
-					if(!paqueteMensajeSala.getMsj().equals("") && paqueteMensajeSala.getMsj() != null)
-						Servidor.getSalas().get(paqueteMensajeSala.getNombreSala()).getHistorial().concat(paqueteMensajeSala.getUserEmisor() + ": " + paqueteMensajeSala.getMsj() + "\n");
-					else
-						Servidor.getSalas().get(paqueteMensajeSala.getNombreSala()).getHistorial().concat(paqueteMensajeSala.getUserEmisor() + "\n");	
-
+					Servidor.getSalas().get(paqueteMensajeSala.getNombreSala()).getHistorial().concat(paqueteMensajeSala.getUserEmisor() + ": " + paqueteMensajeSala.getMsj() + "\n");
 					Servidor.getConector().guardarChatSala(paqueteMensajeSala);
 
 					break;
@@ -267,23 +262,28 @@ public class EscuchaCliente extends Thread {
 				case Comando.ELIMINARSALA:
 
 					paqueteSala = (PaqueteSala) (gson.fromJson(cadenaLeida, PaqueteSala.class));
-
-					if(Servidor.getConector().eliminarSala(paqueteSala)){
-
-						// COMO SE ELIMINO LA SALA LE INFORMO A LOS QUE ESTABAN CONECTADOS
-						Servidor.getNombresSalasDisponibles().remove(paqueteSala.getNombreSala());
-						Servidor.getSalas().remove(paqueteSala.getNombreSala());
-						paqueteSala.setComando(Comando.ELIMINARSALA);
-						paqueteSala.setMsj(Paquete.msjExito);
-						for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
-							conectado.getSalida().writeObject(gson.toJson(paqueteSala));
+					if(paqueteSala.getCliente().equals(Servidor.getSalas().get(paqueteSala.getNombreSala()).getOwnerSala())){
+						if(Servidor.getConector().eliminarSala(paqueteSala)){
+							// COMO SE ELIMINO LA SALA LE INFORMO A LOS QUE ESTABAN CONECTADOS
+							Servidor.getNombresSalasDisponibles().remove(paqueteSala.getNombreSala());
+							Servidor.getSalas().remove(paqueteSala.getNombreSala());
+							paqueteSala.setComando(Comando.ELIMINARSALA);
+							paqueteSala.setMsj(Paquete.msjExito);
+							for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
+								conectado.getSalida().writeObject(gson.toJson(paqueteSala));
+							}
+							break;
+						} else {
+							paqueteSala.setComando(Comando.ELIMINARSALA);
+							paqueteSala.setMsj(Paquete.msjFracaso);
+							salida.writeObject(gson.toJson(paqueteSala));
 						}
-						break;
-					} else {
+					}else{
 						paqueteSala.setComando(Comando.ELIMINARSALA);
-						paqueteSala.setMsj(Paquete.msjFracaso);
-
+						paqueteSala.setMsj(Paquete.msjFallo);
+						salida.writeObject(gson.toJson(paqueteSala));
 					}
+
 
 					break;
 				default:
