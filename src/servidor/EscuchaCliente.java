@@ -65,7 +65,6 @@ public class EscuchaCliente extends Thread {
 						pus.setMsj(Paquete.msjExito);
 
 						Servidor.UsuariosConectados.add(paqueteUsuario.getUsername());
-
 						// Consigo el socket, y entonces ahora pongo el username y el socket en el map
 						int index = Servidor.UsuariosConectados.indexOf(paqueteUsuario.getUsername());
 						Servidor.mapConectados.put(paqueteUsuario.getUsername(), Servidor.SocketsConectados.get(index));
@@ -296,25 +295,32 @@ public class EscuchaCliente extends Thread {
 					cadenaLeida = (String) entrada.readObject();
 				}
 			}
-			Servidor.log.append(paqueteUsuario.getUsername() + " ha Cerrado Sesión" + System.lineSeparator());
 
-			entrada.close();
-			salida.close();
-			socket.close();
+			paqueteUsuario = (PaqueteUsuario) (gson.fromJson(cadenaLeida, PaqueteUsuario.class));
 
-			int index = Servidor.UsuariosConectados.indexOf(paqueteUsuario.getUsername());
-			Servidor.SocketsConectados.remove(index);
-			Servidor.getPersonajesConectados().remove(paqueteUsuario.getUsername());
-			Servidor.getUsuariosConectados().remove(paqueteUsuario.getUsername());
-			Servidor.getClientesConectados().remove(this);
-
-			for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
-				paqueteDeUsuarios = new PaqueteDeUsuariosYSalas(Servidor.getUsuariosConectados());
-				paqueteDeUsuarios.setComando(Comando.CONEXION);
-				conectado.salida.writeObject(gson.toJson(paqueteDeUsuarios, PaqueteDeUsuariosYSalas.class));
+			if (paqueteUsuario.getUsername()!=null) {
+				Servidor.log.append(paqueteUsuario.getUsername() + " ha Cerrado Sesión" + System.lineSeparator());
+				
+				entrada.close();
+				salida.close();
+				socket.close();
+				
+				int index = Servidor.UsuariosConectados.indexOf(paqueteUsuario.getUsername());
+				Servidor.SocketsConectados.remove(index);
+				Servidor.getPersonajesConectados().remove(paqueteUsuario.getUsername());
+				Servidor.getUsuariosConectados().remove(paqueteUsuario.getUsername());
+				Servidor.getClientesConectados().remove(this);
+				for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
+					paqueteDeUsuarios = new PaqueteDeUsuariosYSalas(Servidor.getUsuariosConectados());
+					paqueteDeUsuarios.setComando(Comando.CONEXION);
+					conectado.salida.writeObject(gson.toJson(paqueteDeUsuarios, PaqueteDeUsuariosYSalas.class));
+				}
+			} else {
+				int index = Servidor.getSocketsConectados().indexOf(socket);
+				Servidor.getClientesConectados().remove(index);
 			}
-
-			Servidor.log.append(paquete.getIp() + " cerró su Sesión " + System.lineSeparator());
+			
+			Servidor.log.append(paquete.getIp() + " se ha desconectado " + System.lineSeparator());
 
 		} catch (IOException | ClassNotFoundException e) {
 			Servidor.log.append("Hubo un error de conexion: " + e.getMessage() + System.lineSeparator());

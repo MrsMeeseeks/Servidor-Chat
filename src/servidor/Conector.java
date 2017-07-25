@@ -21,7 +21,7 @@ public class Conector {
 
 	public void connect() {
 		try {
-			Servidor.log.append("Estableciendo conexi�n con la base de datos..." + System.lineSeparator());
+			Servidor.log.append("Estableciendo conexión con la base de datos..." + System.lineSeparator());
 			connect = DriverManager.getConnection("jdbc:sqlite:" + url);
 			Servidor.log.append("Conexión con la base de datos establecida con éxito." + System.lineSeparator());
 		} catch (SQLException ex) {
@@ -79,21 +79,22 @@ public class Conector {
 
 				if (result.next()) {
 					Servidor.log.append(
-							"El usuario " + user.getUsername() + " ha iniciado sesi�n." + System.lineSeparator());
+							"El usuario " + user.getUsername() + " ha iniciado sesión." + System.lineSeparator());
 					return true;
 				}
 
 				Servidor.log.append("El usuario " + user.getUsername()
-						+ " ha realizado un intento fallido de inicio de sesi�n." + System.lineSeparator());
+						+ " ha realizado un intento fallido de inicio de sesión." + System.lineSeparator());
 				return false;
 
 			} catch (SQLException e) {
-				Servidor.log.append(
-						"El usuario " + user.getUsername() + " fallo al iniciar sesi�n." + System.lineSeparator());
+				
 				e.printStackTrace();
 				return false;
 			} 
 		} else {
+			Servidor.log.append(
+						"El usuario " + user.getUsername() + " ya había iniciado sesión." + System.lineSeparator());
 			return false;
 		}
 
