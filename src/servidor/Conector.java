@@ -68,24 +68,32 @@ public class Conector {
 
 	
 	public boolean loguearUsuario(PaqueteUsuario user) {
-		ResultSet result = null;
-		try {
-			PreparedStatement st = connect.prepareStatement("SELECT * FROM registro WHERE usuario = ? AND password = ? ");
-			st.setString(1, user.getUsername());
-			st.setString(2, user.getPassword());
-			result = st.executeQuery();
+		if (!Servidor.getUsuariosConectados().contains(user.getUsername())) {
+			ResultSet result = null;
+			try {
+				PreparedStatement st = connect
+						.prepareStatement("SELECT * FROM registro WHERE usuario = ? AND password = ? ");
+				st.setString(1, user.getUsername());
+				st.setString(2, user.getPassword());
+				result = st.executeQuery();
 
-			if (result.next()) {
-				Servidor.log.append("El usuario " + user.getUsername() + " ha iniciado sesi�n." + System.lineSeparator());
-				return true;
-			}
-			
-			Servidor.log.append("El usuario " + user.getUsername() + " ha realizado un intento fallido de inicio de sesi�n." + System.lineSeparator());
-			return false;
+				if (result.next()) {
+					Servidor.log.append(
+							"El usuario " + user.getUsername() + " ha iniciado sesi�n." + System.lineSeparator());
+					return true;
+				}
 
-		} catch (SQLException e) {
-			Servidor.log.append("El usuario " + user.getUsername() + " fallo al iniciar sesi�n." + System.lineSeparator());
-			e.printStackTrace();
+				Servidor.log.append("El usuario " + user.getUsername()
+						+ " ha realizado un intento fallido de inicio de sesi�n." + System.lineSeparator());
+				return false;
+
+			} catch (SQLException e) {
+				Servidor.log.append(
+						"El usuario " + user.getUsername() + " fallo al iniciar sesi�n." + System.lineSeparator());
+				e.printStackTrace();
+				return false;
+			} 
+		} else {
 			return false;
 		}
 
