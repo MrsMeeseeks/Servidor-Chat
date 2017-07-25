@@ -99,33 +99,7 @@ public class Conector {
 		}
 
 	}
-	
-	public boolean cargarChatSalas(PaqueteSala salas) {
-		ResultSet result = null;
-		try {
-			PreparedStatement st = connect.prepareStatement("SELECT * FROM Salas WHERE Name = ?");
-			st.setString(1, salas.getNombreSala());
-			result = st.executeQuery();
-			
-			salas.setTexto(result.getString("Chat"));
-			salas.setOwnerSala(result.getString("Owner"));
-
-			if (result.next()) {
-				Servidor.log.append("La Sala " + salas.getNombreSala() + " ha cargado el historial de chat correctamente" + System.lineSeparator());
-				return true;
-			}
-			
-			Servidor.log.append("La Sala " + salas.getNombreSala() + " ha realizado un intento fallido de carga del historial de chat" + System.lineSeparator());
-			return false;
-
-		} catch (SQLException e) {
-			Servidor.log.append("La Sala " + salas.getNombreSala() + " fallo al cargar el historial de chat." + System.lineSeparator());
-			e.printStackTrace();
-			return false;
-		}
-
-	}
-	
+		
 	public boolean registrarSala(PaqueteSala paqueteSala) {
 		ResultSet result = null;
 		try {

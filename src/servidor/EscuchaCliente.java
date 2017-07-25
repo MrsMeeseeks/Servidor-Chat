@@ -238,15 +238,12 @@ public class EscuchaCliente extends Thread {
 						paqueteSala.setMsj(Paquete.msjExito);
 						paqueteSala.setComando(Comando.ENTRARSALA);
 
-						if(Servidor.getConector().cargarChatSalas(paqueteSala)){
-							salida.writeObject(gson.toJson(paqueteSala));
+						salida.writeObject(gson.toJson(paqueteSala));
 
-							synchronized(Servidor.atencionConexionesSalas){
-								Servidor.atencionConexionesSalas.setNombreSala(paqueteSala.getNombreSala());
-								Servidor.atencionConexionesSalas.notify();
-							}
+						synchronized(Servidor.atencionConexionesSalas){
+							Servidor.atencionConexionesSalas.setNombreSala(paqueteSala.getNombreSala());
+							Servidor.atencionConexionesSalas.notify();
 						}
-
 
 					} else {
 						paqueteSala.setMsj(Paquete.msjFracaso);
@@ -282,7 +279,25 @@ public class EscuchaCliente extends Thread {
 						paqueteSala.setMsj(Paquete.msjFallo);
 						salida.writeObject(gson.toJson(paqueteSala));
 					}
+					break;
 
+				case Comando.DESCONECTARDESALA:
+					paqueteSala = (PaqueteSala) (gson.fromJson(cadenaLeida, PaqueteSala.class));
+					if(Servidor.getNombresSalasDisponibles().contains(paqueteSala.getNombreSala()) 
+							&& Servidor.getSalas().get(paqueteSala.getNombreSala()).getUsuariosConectados().contains(paqueteSala.getCliente())) {
+						Servidor.getSalas().get(paqueteSala.getNombreSala()).getUsuariosConectados().remove(paqueteSala.getCliente());
+						paqueteSala = Servidor.getSalas().get(paqueteSala.getNombreSala());
+						paqueteSala.setComando(Comando.DESCONECTARDESALA);
+
+						salida.writeObject(gson.toJson(paqueteSala));
+
+
+						synchronized(Servidor.atencionConexionesSalas){
+							Servidor.atencionConexionesSalas.setNombreSala(paqueteSala.getNombreSala());
+							Servidor.atencionConexionesSalas.notify();
+						}
+
+					}
 
 					break;
 				default:
@@ -300,11 +315,11 @@ public class EscuchaCliente extends Thread {
 
 			if (paqueteUsuario.getUsername()!=null) {
 				Servidor.log.append(paqueteUsuario.getUsername() + " ha Cerrado Sesión" + System.lineSeparator());
-				
+
 				entrada.close();
 				salida.close();
 				socket.close();
-				
+
 				int index = Servidor.UsuariosConectados.indexOf(paqueteUsuario.getUsername());
 				Servidor.SocketsConectados.remove(index);
 				Servidor.getPersonajesConectados().remove(paqueteUsuario.getUsername());
@@ -319,7 +334,7 @@ public class EscuchaCliente extends Thread {
 				int index = Servidor.getSocketsConectados().indexOf(socket);
 				Servidor.getClientesConectados().remove(index);
 			}
-			
+
 			Servidor.log.append(paquete.getIp() + " se ha desconectado " + System.lineSeparator());
 
 		} catch (IOException | ClassNotFoundException e) {
