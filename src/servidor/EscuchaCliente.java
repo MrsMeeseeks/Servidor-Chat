@@ -145,8 +145,11 @@ public class EscuchaCliente extends Thread {
 							count1++;
 						}
 					}
+					String msjAgregar = paqueteMensajeSala.getUserEmisor() + ": " + paqueteMensajeSala.getMsj() + "\n";
+					String chatAnterior = Servidor.getSalas().get(paqueteMensajeSala.getNombreSala()).getHistorial();
+					
+					Servidor.getSalas().get(paqueteMensajeSala.getNombreSala()).setHistorial(chatAnterior + msjAgregar);
 
-					Servidor.getSalas().get(paqueteMensajeSala.getNombreSala()).getHistorial().concat(paqueteMensajeSala.getUserEmisor() + ": " + paqueteMensajeSala.getMsj() + "\n");
 					Servidor.getConector().guardarChatSala(paqueteMensajeSala);
 
 					break;
