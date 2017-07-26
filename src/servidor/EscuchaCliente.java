@@ -331,6 +331,19 @@ public class EscuchaCliente extends Thread {
 					paqueteDeUsuarios.setComando(Comando.CONEXION);
 					conectado.salida.writeObject(gson.toJson(paqueteDeUsuarios, PaqueteDeUsuariosYSalas.class));
 				}
+				
+				for (String nombreSala : Servidor.getNombresSalasDisponibles()) {
+					if(Servidor.getSalas().get(nombreSala).getUsuariosConectados().contains(paqueteUsuario.getUsername())) {
+						Servidor.getSalas().get(nombreSala).getUsuariosConectados().remove(paqueteUsuario.getUsername());
+						PaqueteSala paq = Servidor.getSalas().get(nombreSala);
+						String s = gson.toJson(paq);
+						for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
+							if(paq.getUsuariosConectados().contains(conectado.getPaqueteUsuario().getUsername())) {
+								conectado.getSalida().writeObject(s);
+							}
+						}
+					}
+				}
 			} else {
 				int index = Servidor.getSocketsConectados().indexOf(socket);
 				Servidor.getClientesConectados().remove(index);

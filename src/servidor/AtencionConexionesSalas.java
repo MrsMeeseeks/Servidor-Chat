@@ -22,11 +22,9 @@ public class AtencionConexionesSalas extends Thread {
 					wait();
 					// Le reenvio la conexion a todos
 					if (nombreSala != null) {
-
 						PaqueteSala ps = Servidor.getSalas().get(nombreSala);						
 						ps.setComando(Comando.CONEXIONSALA);
 						String s = gson.toJson(ps);
-
 						for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
 							if (ps.getUsuariosConectados()
 									.contains(conectado.getPaqueteUsuario().getUsername())) {
