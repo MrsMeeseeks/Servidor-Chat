@@ -206,8 +206,9 @@ public class EscuchaCliente extends Thread {
 					paqueteUsuario = (PaqueteUsuario) (gson.fromJson(cadenaLeida, PaqueteUsuario.class));
 					if (Servidor.getConector().registrarUsuario(paqueteUsuario)) {
 
-						paqueteUsuario.setComando(Comando.REGISTRO);
-						paqueteUsuario.setMsj(Paquete.msjExito);
+						PaqueteDeUsuariosYSalas pus = new PaqueteDeUsuariosYSalas(Servidor.getUsuariosConectados(), Servidor.getNombresSalasDisponibles());
+						pus.setComando(Comando.REGISTRO);
+						pus.setMsj(Paquete.msjExito);
 
 						Servidor.UsuariosConectados.add(paqueteUsuario.getUsername());
 
@@ -215,7 +216,7 @@ public class EscuchaCliente extends Thread {
 						int index = Servidor.UsuariosConectados.indexOf(paqueteUsuario.getUsername());
 						Servidor.mapConectados.put(paqueteUsuario.getUsername(), Servidor.SocketsConectados.get(index));
 
-						salida.writeObject(gson.toJson(paqueteUsuario));
+						salida.writeObject(gson.toJson(pus));
 
 						// COMO SE CONECTO 1 LE DIGO AL SERVER QUE LE MANDE A TODOS LOS QUE SE CONECTAN
 						synchronized(Servidor.atencionConexiones){
