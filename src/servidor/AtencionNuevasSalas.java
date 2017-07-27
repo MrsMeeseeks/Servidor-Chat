@@ -5,7 +5,7 @@ import com.google.gson.Gson;
 
 import paqueteEnvios.Comando;
 import paqueteEnvios.Paquete;
-import paqueteEnvios.PaqueteDeSalas;
+import paqueteEnvios.PaqueteDeUsuariosYSalas;
 
 public class AtencionNuevasSalas extends Thread {
 
@@ -21,11 +21,11 @@ public class AtencionNuevasSalas extends Thread {
 					// Espero a que se cree una sala nueva
 					wait();
 					// Le reenvio la nueva sala a todos
-					PaqueteDeSalas ps = (PaqueteDeSalas) new PaqueteDeSalas(Servidor.getNombresSalasDisponibles())
+					PaqueteDeUsuariosYSalas psu =  (PaqueteDeUsuariosYSalas) new PaqueteDeUsuariosYSalas(null,Servidor.getNombresSalasDisponibles())
 							.clone();
-					ps.setComando(Comando.NEWSALA);
-					ps.setMsj(Paquete.msjExito);
-					String s = gson.toJson(ps);
+					psu.setComando(Comando.NEWSALA);
+					psu.setMsj(Paquete.msjExito);
+					String s = gson.toJson(psu);
 					for (EscuchaCliente conectado : Servidor.getClientesConectados())
 						if (conectado.getPaqueteUsuario().getEstado())
 							conectado.getSalida().writeObject(s);

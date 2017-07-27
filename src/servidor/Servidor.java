@@ -11,23 +11,18 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
-import intefaces.Sala;
-import paqueteEnvios.PaqueteMencion;
+
 import paqueteEnvios.PaqueteMensaje;
 import paqueteEnvios.PaqueteSala;
-import paqueteEnvios.PaqueteUsuario;
 
 import java.awt.TextArea;
 import java.awt.Color;
-import java.awt.Container;
-import java.awt.SystemColor;
 import java.awt.Font;
 
 public class Servidor extends Thread {
@@ -108,6 +103,7 @@ public class Servidor extends Thread {
 
 		btnParar.setText("Parar Servidor");
 		btnParar.addActionListener(new ActionListener() {
+			@SuppressWarnings("deprecation")
 			public void actionPerformed(ActionEvent e) {
 				try {
 					estadoServer = false;
@@ -136,6 +132,7 @@ public class Servidor extends Thread {
 		ventana.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
 		ventana.addWindowListener(new WindowAdapter() {
+			@SuppressWarnings("deprecation")
 			public void windowClosing(WindowEvent evt) {
 				if (serverSocket != null) {
 					try {
@@ -278,18 +275,18 @@ public class Servidor extends Thread {
 		}
 	}
 	
-	public static boolean mencionUsuario(PaqueteMencion pqm) {
+	public static boolean mencionUsuario(PaqueteMensaje paqueteMensaje) {
 		boolean result = true;
-		if(!UsuariosConectados.contains(pqm.getUserReceptor())) {
+		if(!UsuariosConectados.contains(paqueteMensaje.getUserReceptor())) {
 			result = false;
 		}
 		// Si existe inicio sesion
 		if (result) {
-			Servidor.getLog().append(pqm.getUserEmisor() + " mencionó " + pqm.getUserReceptor() + System.lineSeparator());
+			Servidor.getLog().append(paqueteMensaje.getUserEmisor() + " mencionó " + paqueteMensaje.getUserReceptor() + System.lineSeparator());
 			return true;
 		} else {
 			// Si no existe informo y devuelvo false
-			Servidor.getLog().append("La mención para el usuario " + pqm.getUserReceptor() + " no se ha podido enviar, usario inexistente/desconectado." + System.lineSeparator());
+			Servidor.getLog().append("La mención para el usuario " + paqueteMensaje.getUserReceptor() + " no se ha podido enviar, usario inexistente/desconectado." + System.lineSeparator());
 			return false;
 		}
 	}

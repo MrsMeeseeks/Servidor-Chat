@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
 
-import javax.swing.text.html.HTMLDocument.Iterator;
 
 import com.google.gson.Gson;
 
@@ -14,9 +12,6 @@ import comandos.ComandoServer;
 import paqueteEnvios.Comando;
 import paqueteEnvios.Paquete;
 import paqueteEnvios.PaqueteDeUsuariosYSalas;
-import paqueteEnvios.PaqueteMencion;
-import paqueteEnvios.PaqueteMensaje;
-import paqueteEnvios.PaqueteMensajeSala;
 import paqueteEnvios.PaqueteSala;
 import paqueteEnvios.PaqueteUsuario;
 
@@ -30,9 +25,8 @@ public class EscuchaCliente extends Thread {
 
 	private PaqueteUsuario paqueteUsuario;
 	private PaqueteDeUsuariosYSalas paqueteDeUsuarios;
-	private PaqueteMensaje paqueteMensaje;
-	private PaqueteMensajeSala paqueteMensajeSala;
-	private PaqueteMencion paqueteMencion;
+
+
 
 	public EscuchaCliente(String ip, Socket socket, ObjectInputStream entrada, ObjectOutputStream salida) {
 		this.socket = socket;
@@ -95,6 +89,7 @@ public class EscuchaCliente extends Thread {
 				}
 			} else {
 				int index = Servidor.getSocketsConectados().indexOf(socket);
+				Servidor.getSocketsConectados().remove(index);
 				Servidor.getClientesConectados().remove(index);
 			}
 

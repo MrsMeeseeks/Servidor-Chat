@@ -20,7 +20,6 @@ public class InicioSesion extends ComandoServer {
 		try {
 
 			if(!Servidor.getUsuariosConectados().contains(paqueteUsuario.getUsername())) {
-				// Si se puede loguear el usuario le envio un mensaje de exito y el paquete usuario con los datos
 				if (Servidor.getConector().loguearUsuario(paqueteUsuario)) {
 					escuchaCliente.setPaqueteUsuario(paqueteUsuario);
 					PaqueteDeUsuariosYSalas pus = new PaqueteDeUsuariosYSalas(Servidor.getUsuariosConectados(),
@@ -36,7 +35,6 @@ public class InicioSesion extends ComandoServer {
 
 					escuchaCliente.getSalida().writeObject(gson.toJson(pus));
 
-					// COMO SE CONECTO 1 LE DIGO AL SERVER QUE LE MANDE A TODOS LOS QUE SE CONECTAN
 					synchronized (Servidor.getAtencionConexiones()) {
 						Servidor.getAtencionConexiones().notify();
 					}

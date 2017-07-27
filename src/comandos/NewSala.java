@@ -16,7 +16,7 @@ public class NewSala extends ComandoServer{
 			if(Servidor.getConector().registrarSala(paqueteSala)){
 				Servidor.getNombresSalasDisponibles().add(paqueteSala.getNombreSala());
 				Servidor.getSalas().put(paqueteSala.getNombreSala(),paqueteSala);
-				// COMO SE CREO 1 SALA NUEVA LE DIGO AL SERVER QUE LE MANDE A TODOS LOS QUE SE CONECTAN
+
 				synchronized(Servidor.getAtencionNuevasSalas()){
 					Servidor.getAtencionNuevasSalas().notify();
 				}

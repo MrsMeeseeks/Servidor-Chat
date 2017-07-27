@@ -9,8 +9,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import intefaces.Sala;
-import paqueteEnvios.PaqueteMensajeSala;
+import paqueteEnvios.PaqueteMensaje;
 import paqueteEnvios.PaqueteSala;
 import paqueteEnvios.PaqueteUsuario;
 
@@ -41,7 +40,6 @@ public class Conector {
 	}
 
 	public boolean registrarUsuario(PaqueteUsuario user) {
-		ResultSet result = null;
 		try {
 			PreparedStatement st = connect.prepareStatement("INSERT INTO registro (usuario, password) VALUES (?,?)");
 			st.setString(1, user.getUsername());
@@ -125,16 +123,16 @@ public class Conector {
 		}
 	}
 
-	public boolean guardarChatSala(PaqueteMensajeSala msjSalas) {
+	public boolean guardarChatSala(PaqueteMensaje msj) {
 		try {
 			PreparedStatement st = connect.prepareStatement("UPDATE Salas SET Chat = Chat || ? WHERE Name = ?");
-			st.setString(1, msjSalas.getUserEmisor() + ": " + msjSalas.getMsj() + "\n");
-			st.setString(2, msjSalas.getNombreSala());
+			st.setString(1, msj.getUserEmisor() + ": " + msj.getMsj() + "\n");
+			st.setString(2, msj.getNombreSala());
 			st.executeUpdate();
 			return true;
 
 		} catch (SQLException e) {
-			Servidor.getLog().append("La Sala " + msjSalas.getNombreSala() + " fallo al intentar actualiarze en la BD" + System.lineSeparator());
+			Servidor.getLog().append("La Sala " + msj.getNombreSala() + " fallo al intentar actualiarze en la BD" + System.lineSeparator());
 			e.printStackTrace();
 			return false;
 		}
