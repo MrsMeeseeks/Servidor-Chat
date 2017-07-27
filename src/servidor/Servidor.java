@@ -31,6 +31,7 @@ import java.awt.SystemColor;
 import java.awt.Font;
 
 public class Servidor extends Thread {
+	
 	public static ArrayList<Socket> SocketsConectados = new ArrayList<Socket>();
 	public static ArrayList<String> UsuariosConectados = new ArrayList<String>();
 	private static ArrayList<EscuchaCliente> clientesConectados = new ArrayList<>();
@@ -45,7 +46,7 @@ public class Servidor extends Thread {
 
 	private static Thread server;
 
-	static TextArea log = new TextArea();
+	private static TextArea log = new TextArea();
 	static boolean estadoServer;
 
 	public static AtencionConexiones atencionConexiones;
@@ -71,12 +72,12 @@ public class Servidor extends Thread {
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setBounds(20, 74, 485, 424);
 		ventana.getContentPane().add(scrollPane);
-		log.setFont(new Font("Arial", Font.PLAIN, 14));
-		log.setBackground(Color.BLACK);
-		log.setForeground(Color.WHITE);
-		log.setEditable(false);
+		getLog().setFont(new Font("Arial", Font.PLAIN, 14));
+		getLog().setBackground(Color.BLACK);
+		getLog().setForeground(Color.WHITE);
+		getLog().setEditable(false);
 
-		scrollPane.setRowHeaderView(log);
+		scrollPane.setRowHeaderView(getLog());
 
 		final JButton btnIniciar = new JButton();
 		btnIniciar.setForeground(Color.WHITE);
@@ -119,9 +120,9 @@ public class Servidor extends Thread {
 						cliente.getSocket().close();
 					}
 					serverSocket.close();
-					log.append("El servidor se ha detenido." + System.lineSeparator());
+					getLog().append("El servidor se ha detenido." + System.lineSeparator());
 				} catch (IOException e1) {
-					log.append("Fallo al intentar detener el servidor." + System.lineSeparator());
+					getLog().append("Fallo al intentar detener el servidor." + System.lineSeparator());
 					e1.printStackTrace();
 				}
 				btnParar.setEnabled(false);
@@ -149,7 +150,7 @@ public class Servidor extends Thread {
 						}
 						serverSocket.close();
 					} catch (IOException e) {
-						log.append("Fallo al intentar detener el servidor." + System.lineSeparator());
+						getLog().append("Fallo al intentar detener el servidor." + System.lineSeparator());
 						e.printStackTrace();
 						System.exit(1);
 					}
@@ -160,15 +161,47 @@ public class Servidor extends Thread {
 		ventana.setVisible(true);
 	}
 
+	public static Map<String, Socket> getMapConectados() {
+		return mapConectados;
+	}
+
+	public static void setMapConectados(Map<String, Socket> mapConectados) {
+		Servidor.mapConectados = mapConectados;
+	}
+
+	public static AtencionConexiones getAtencionConexiones() {
+		return atencionConexiones;
+	}
+
+	public static void setAtencionConexiones(AtencionConexiones atencionConexiones) {
+		Servidor.atencionConexiones = atencionConexiones;
+	}
+
+	public static AtencionNuevasSalas getAtencionNuevasSalas() {
+		return atencionNuevasSalas;
+	}
+
+	public static void setAtencionNuevasSalas(AtencionNuevasSalas atencionNuevasSalas) {
+		Servidor.atencionNuevasSalas = atencionNuevasSalas;
+	}
+
+	public static AtencionConexionesSalas getAtencionConexionesSalas() {
+		return atencionConexionesSalas;
+	}
+
+	public static void setAtencionConexionesSalas(AtencionConexionesSalas atencionConexionesSalas) {
+		Servidor.atencionConexionesSalas = atencionConexionesSalas;
+	}
+
 	@Override
 	public void run() {
 		try {
 			conexionDB = new Conector();
 			conexionDB.connect();
 			estadoServer = true;
-			log.append("Iniciando el servidor..." + System.lineSeparator());
+			getLog().append("Iniciando el servidor..." + System.lineSeparator());
 			serverSocket = new ServerSocket(puerto);
-			log.append("Servidor esperando conexiones..." + System.lineSeparator());
+			getLog().append("Servidor esperando conexiones..." + System.lineSeparator());
 			String ipRemota;
 
 			conexionDB.cargarSalasExistentes();
@@ -186,7 +219,7 @@ public class Servidor extends Thread {
 				SocketsConectados.add(cliente);
 
 				ipRemota = cliente.getInetAddress().getHostAddress();
-				log.append(ipRemota + " se ha conectado" + System.lineSeparator());
+				getLog().append(ipRemota + " se ha conectado" + System.lineSeparator());
 
 				ObjectOutputStream salida = new ObjectOutputStream(cliente.getOutputStream());
 				ObjectInputStream entrada = new ObjectInputStream(cliente.getInputStream());
@@ -196,7 +229,7 @@ public class Servidor extends Thread {
 				clientesConectados.add(atencion);
 			}
 		} catch (Exception e) {
-			log.append("Fallo la conexión." + System.lineSeparator());
+			getLog().append("Fallo la conexión." + System.lineSeparator());
 			e.printStackTrace();
 		}
 	}
@@ -236,11 +269,11 @@ public class Servidor extends Thread {
 		}
 		// Si existe inicio sesion
 		if (result) {
-			Servidor.log.append(pqm.getUserEmisor() + " envió mensaje a " + pqm.getUserReceptor() + System.lineSeparator());
+			Servidor.getLog().append(pqm.getUserEmisor() + " envió mensaje a " + pqm.getUserReceptor() + System.lineSeparator());
 			return true;
 		} else {
 			// Si no existe informo y devuelvo false
-			Servidor.log.append("El mensaje para " + pqm.getUserReceptor() + " no se ha podido enviar, usario inexistente/desconectado." + System.lineSeparator());
+			Servidor.getLog().append("El mensaje para " + pqm.getUserReceptor() + " no se ha podido enviar, usario inexistente/desconectado." + System.lineSeparator());
 			return false;
 		}
 	}
@@ -252,11 +285,11 @@ public class Servidor extends Thread {
 		}
 		// Si existe inicio sesion
 		if (result) {
-			Servidor.log.append(pqm.getUserEmisor() + " mencionó " + pqm.getUserReceptor() + System.lineSeparator());
+			Servidor.getLog().append(pqm.getUserEmisor() + " mencionó " + pqm.getUserReceptor() + System.lineSeparator());
 			return true;
 		} else {
 			// Si no existe informo y devuelvo false
-			Servidor.log.append("La mención para el usuario " + pqm.getUserReceptor() + " no se ha podido enviar, usario inexistente/desconectado." + System.lineSeparator());
+			Servidor.getLog().append("La mención para el usuario " + pqm.getUserReceptor() + " no se ha podido enviar, usario inexistente/desconectado." + System.lineSeparator());
 			return false;
 		}
 	}
@@ -268,11 +301,11 @@ public class Servidor extends Thread {
 		}
 		// Si existe inicio sesion
 		if (result) {
-			Servidor.log.append("Se ha enviado un mensaje general" + System.lineSeparator());
+			Servidor.getLog().append("Se ha enviado un mensaje general" + System.lineSeparator());
 			return true;
 		} else {
 			// Si no existe informo y devuelvo false
-			Servidor.log.append("Se ha desconectado un usuario" + System.lineSeparator());
+			Servidor.getLog().append("Se ha desconectado un usuario" + System.lineSeparator());
 			return false;
 		}
 	}
@@ -300,13 +333,21 @@ public class Servidor extends Thread {
 		}
 		// Si existe inicio sesion
 		if (result) {
-			Servidor.log.append("Se ha enviado un mensaje por sala" + System.lineSeparator());
+			Servidor.getLog().append("Se ha enviado un mensaje por sala" + System.lineSeparator());
 			return true;
 		} else {
 			// Si no existe informo y devuelvo false
-			Servidor.log.append("Se ha desconectado un usuario" + System.lineSeparator());
+			Servidor.getLog().append("Se ha desconectado un usuario" + System.lineSeparator());
 			return false;
 		}
 		
+	}
+
+	public static TextArea getLog() {
+		return log;
+	}
+
+	public static void setLog(TextArea log) {
+		Servidor.log = log;
 	}
 }

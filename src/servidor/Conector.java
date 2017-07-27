@@ -21,11 +21,11 @@ public class Conector {
 
 	public void connect() {
 		try {
-			Servidor.log.append("Estableciendo conexión con la base de datos..." + System.lineSeparator());
+			Servidor.getLog().append("Estableciendo conexión con la base de datos..." + System.lineSeparator());
 			connect = DriverManager.getConnection("jdbc:sqlite:" + url);
-			Servidor.log.append("Conexión con la base de datos establecida con éxito." + System.lineSeparator());
+			Servidor.getLog().append("Conexión con la base de datos establecida con éxito." + System.lineSeparator());
 		} catch (SQLException ex) {
-			Servidor.log.append("Fallo al intentar establecer la conexión con la base de datos. " + ex.getMessage()
+			Servidor.getLog().append("Fallo al intentar establecer la conexión con la base de datos. " + ex.getMessage()
 					+ System.lineSeparator());
 		}
 	}
@@ -34,7 +34,7 @@ public class Conector {
 		try {
 			connect.close();
 		} catch (SQLException ex) {
-			Servidor.log.append("Error al intentar cerrar la conexión con la base de datos." + System.lineSeparator());
+			Servidor.getLog().append("Error al intentar cerrar la conexión con la base de datos." + System.lineSeparator());
 			Logger.getLogger(Conector.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -52,14 +52,14 @@ public class Conector {
 				st.setString(1, user.getUsername());
 				st.setString(2, user.getPassword());
 				st.execute();
-				Servidor.log.append("El usuario " + user.getUsername() + " se ha registrado." + System.lineSeparator());
+				Servidor.getLog().append("El usuario " + user.getUsername() + " se ha registrado." + System.lineSeparator());
 				return true;
 			} else {
-				Servidor.log.append("El usuario " + user.getUsername() + " ya se encuentra en uso." + System.lineSeparator());
+				Servidor.getLog().append("El usuario " + user.getUsername() + " ya se encuentra en uso." + System.lineSeparator());
 				return false;
 			}
 		} catch (SQLException ex) {
-			Servidor.log.append("Eror al intentar registrar el usuario " + user.getUsername() + System.lineSeparator());
+			Servidor.getLog().append("Eror al intentar registrar el usuario " + user.getUsername() + System.lineSeparator());
 			System.err.println(ex.getMessage());
 			return false;
 		}
@@ -78,12 +78,12 @@ public class Conector {
 				result = st.executeQuery();
 
 				if (result.next()) {
-					Servidor.log.append(
+					Servidor.getLog().append(
 							"El usuario " + user.getUsername() + " ha iniciado sesión." + System.lineSeparator());
 					return true;
 				}
 
-				Servidor.log.append("El usuario " + user.getUsername()
+				Servidor.getLog().append("El usuario " + user.getUsername()
 						+ " ha realizado un intento fallido de inicio de sesión." + System.lineSeparator());
 				return false;
 
@@ -93,7 +93,7 @@ public class Conector {
 				return false;
 			} 
 		} else {
-			Servidor.log.append(
+			Servidor.getLog().append(
 						"El usuario " + user.getUsername() + " ya había iniciado sesión." + System.lineSeparator());
 			return false;
 		}
@@ -114,14 +114,14 @@ public class Conector {
 				st.setString(2, paqueteSala.getHistorial());
 				st.setString(3, paqueteSala.getOwnerSala());
 				st.execute();
-				Servidor.log.append("La sala  " + paqueteSala.getNombreSala() + " se ha registrado." + System.lineSeparator());
+				Servidor.getLog().append("La sala  " + paqueteSala.getNombreSala() + " se ha registrado." + System.lineSeparator());
 				return true;
 			} else {
-				Servidor.log.append("La sala " + paqueteSala.getNombreSala() + " ya se existe." + System.lineSeparator());
+				Servidor.getLog().append("La sala " + paqueteSala.getNombreSala() + " ya se existe." + System.lineSeparator());
 				return false;
 			}
 		} catch (SQLException ex) {
-			Servidor.log.append("Eror al intentar registrar la sala " + paqueteSala.getNombreSala() + System.lineSeparator());
+			Servidor.getLog().append("Eror al intentar registrar la sala " + paqueteSala.getNombreSala() + System.lineSeparator());
 			System.err.println(ex.getMessage());
 			return false;
 		}
@@ -132,10 +132,10 @@ public class Conector {
 			PreparedStatement st = connect.prepareStatement("DELETE FROM Salas WHERE Name = ? ");
 			st.setString(1, paqueteSala.getNombreSala());
 			st.execute();
-			Servidor.log.append("La sala  " + paqueteSala.getNombreSala() + " ha sido eliminada." + System.lineSeparator());
+			Servidor.getLog().append("La sala  " + paqueteSala.getNombreSala() + " ha sido eliminada." + System.lineSeparator());
 			return true;
 		} catch (SQLException ex) {
-			Servidor.log.append("Eror al intentar eliminar la sala " + paqueteSala.getNombreSala() + System.lineSeparator());
+			Servidor.getLog().append("Eror al intentar eliminar la sala " + paqueteSala.getNombreSala() + System.lineSeparator());
 			System.err.println(ex.getMessage());
 			return false;
 		}
@@ -150,7 +150,7 @@ public class Conector {
 			return true;
 
 		} catch (SQLException e) {
-			Servidor.log.append("La Sala " + msjSalas.getNombreSala() + " fallo al intentar actualiarze en la BD" + System.lineSeparator());
+			Servidor.getLog().append("La Sala " + msjSalas.getNombreSala() + " fallo al intentar actualiarze en la BD" + System.lineSeparator());
 			e.printStackTrace();
 			return false;
 		}
@@ -174,8 +174,8 @@ public class Conector {
 			
 			return paqueteUsuario;
 		} catch (SQLException e) {
-			Servidor.log.append("Fallo al intentar recuperar el usuario " + usuario + System.lineSeparator());
-			Servidor.log.append(e.getMessage() + System.lineSeparator());
+			Servidor.getLog().append("Fallo al intentar recuperar el usuario " + usuario + System.lineSeparator());
+			Servidor.getLog().append(e.getMessage() + System.lineSeparator());
 			e.printStackTrace();
 		}
 		
@@ -199,10 +199,10 @@ public class Conector {
 				Servidor.getSalas().put(result.getString("Name"),new PaqueteSala (result.getString("Name"),result.getString("Chat"),result.getString("Owner")));
 				result.next();
 			}
-			Servidor.log.append("Se cargaron las salas existentes en la base de datos con éxito." + System.lineSeparator());
+			Servidor.getLog().append("Se cargaron las salas existentes en la base de datos con éxito." + System.lineSeparator());
 		} catch (SQLException e) {
-			Servidor.log.append("Error al intentar cargar las salas existentes en la base de datos." + System.lineSeparator());
-			Servidor.log.append(e.getMessage() + System.lineSeparator());
+			Servidor.getLog().append("Error al intentar cargar las salas existentes en la base de datos." + System.lineSeparator());
+			Servidor.getLog().append(e.getMessage() + System.lineSeparator());
 			e.printStackTrace();
 		}
 		
