@@ -46,7 +46,7 @@ public class Servidor extends Thread {
 
 	private static Thread server;
 
-	private static TextArea log = new TextArea();
+	static TextArea log = new TextArea();
 	static boolean estadoServer;
 
 	public static AtencionConexiones atencionConexiones;

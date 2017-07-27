@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -205,6 +206,32 @@ public class Conector {
 			Servidor.getLog().append(e.getMessage() + System.lineSeparator());
 			e.printStackTrace();
 		}
+		
+	}
+	
+
+	public HashMap<String, String> cargarPalabrasClaveChatBot() {
+		ResultSet result = null;
+		PreparedStatement st;
+		
+		HashMap palabras = new HashMap();
+		
+		try {
+			st = connect.prepareStatement("SELECT * FROM sinonimos");
+			result = st.executeQuery();
+			int cant = result.getInt(1);
+			for (int i = 0; i< cant; i++) {
+				palabras.put(result.getString("palabraA"), result.getString("palabraB"));
+				result.next();
+			}
+			Servidor.log.append("Se cargaron las salas existentes en la base de datos con éxito." + System.lineSeparator());
+		} catch (SQLException e) {
+			Servidor.log.append("Error al intentar cargar las salas existentes en la base de datos." + System.lineSeparator());
+			Servidor.log.append(e.getMessage() + System.lineSeparator());
+			e.printStackTrace();
+		}
+		
+		return palabras;
 		
 	}
 
