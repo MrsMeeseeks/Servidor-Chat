@@ -16,27 +16,31 @@ public class Registro extends ComandoServer {
 	public void ejecutar() {
 		PaqueteUsuario paqueteUsuario = (PaqueteUsuario) (gson.fromJson(cadenaLeida, PaqueteUsuario.class));
 		try {
-			if (Servidor.getConector().registrarUsuario(paqueteUsuario)) {
+			if (!Servidor.getConector().yaRegistrado(paqueteUsuario.getUsername())) {
+				if (Servidor.getConector().registrarUsuario(paqueteUsuario)) {
 
-				PaqueteDeUsuariosYSalas pus = new PaqueteDeUsuariosYSalas(Servidor.getUsuariosConectados(), Servidor.getNombresSalasDisponibles());
-				pus.setComando(Comando.REGISTRO);
-				pus.setMsj(Paquete.msjExito);
+					PaqueteDeUsuariosYSalas pus = new PaqueteDeUsuariosYSalas(Servidor.getUsuariosConectados(),
+							Servidor.getNombresSalasDisponibles());
+					pus.setComando(Comando.REGISTRO);
+					pus.setMsj(Paquete.msjExito);
 
-				Servidor.getUsuariosConectados().add(paqueteUsuario.getUsername());
+					Servidor.getUsuariosConectados().add(paqueteUsuario.getUsername());
 
-				// Consigo el socket, y entonces ahora pongo el username y el socket en el map
-				int index = Servidor.getUsuariosConectados().indexOf(paqueteUsuario.getUsername());
-				Servidor.getMapConectados().put(paqueteUsuario.getUsername(), Servidor.getSocketsConectados().get(index));
+					int index = Servidor.getUsuariosConectados().indexOf(paqueteUsuario.getUsername());
+					Servidor.getMapConectados().put(paqueteUsuario.getUsername(),
+							Servidor.getSocketsConectados().get(index));
 
-				escuchaCliente.getSalida().writeObject(gson.toJson(pus));
+					escuchaCliente.getSalida().writeObject(gson.toJson(pus));
 
-				// COMO SE CONECTO 1 LE DIGO AL SERVER QUE LE MANDE A TODOS LOS QUE SE CONECTAN
-				synchronized(Servidor.getAtencionConexiones()){
-					Servidor.getAtencionConexiones().notify();
-				}
-				// Si el usuario no se pudo registrar le envio un msj de fracaso
+					synchronized (Servidor.getAtencionConexiones()) {
+						Servidor.getAtencionConexiones().notify();
+					}
+				} else {
+					paqueteUsuario.setMsj(Paquete.msjFracaso);
+					escuchaCliente.getSalida().writeObject(gson.toJson(paqueteUsuario));
+				} 
 			} else {
-				paqueteUsuario.setMsj(Paquete.msjFracaso);
+				paqueteUsuario.setMsj(Paquete.msjFallo);
 				escuchaCliente.getSalida().writeObject(gson.toJson(paqueteUsuario));
 			}
 		} catch (JsonSyntaxException | IOException  e) {

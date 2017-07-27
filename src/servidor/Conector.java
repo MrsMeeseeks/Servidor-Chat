@@ -27,7 +27,7 @@ public class Conector {
 			Servidor.getLog().append("Conexión con la base de datos establecida con éxito." + System.lineSeparator());
 		} catch (SQLException ex) {
 			Servidor.getLog().append("Fallo al intentar establecer la conexión con la base de datos. " + ex.getMessage()
-					+ System.lineSeparator());
+			+ System.lineSeparator());
 		}
 	}
 
@@ -43,64 +43,47 @@ public class Conector {
 	public boolean registrarUsuario(PaqueteUsuario user) {
 		ResultSet result = null;
 		try {
-			PreparedStatement st1 = connect.prepareStatement("SELECT * FROM registro WHERE usuario= ? ");
-			st1.setString(1, user.getUsername());
-			result = st1.executeQuery();
-
-			if (!result.next()) {
-
-				PreparedStatement st = connect.prepareStatement("INSERT INTO registro (usuario, password) VALUES (?,?)");
-				st.setString(1, user.getUsername());
-				st.setString(2, user.getPassword());
-				st.execute();
-				Servidor.getLog().append("El usuario " + user.getUsername() + " se ha registrado." + System.lineSeparator());
-				return true;
-			} else {
-				Servidor.getLog().append("El usuario " + user.getUsername() + " ya se encuentra en uso." + System.lineSeparator());
-				return false;
-			}
+			PreparedStatement st = connect.prepareStatement("INSERT INTO registro (usuario, password) VALUES (?,?)");
+			st.setString(1, user.getUsername());
+			st.setString(2, user.getPassword());
+			st.execute();
+			Servidor.getLog().append("El usuario " + user.getUsername() + " se ha registrado." + System.lineSeparator());
+			return true;
 		} catch (SQLException ex) {
 			Servidor.getLog().append("Eror al intentar registrar el usuario " + user.getUsername() + System.lineSeparator());
 			System.err.println(ex.getMessage());
 			return false;
 		}
-
 	}
 
-	
+
 	public boolean loguearUsuario(PaqueteUsuario user) {
-		if (!Servidor.getUsuariosConectados().contains(user.getUsername())) {
-			ResultSet result = null;
-			try {
-				PreparedStatement st = connect
-						.prepareStatement("SELECT * FROM registro WHERE usuario = ? AND password = ? ");
-				st.setString(1, user.getUsername());
-				st.setString(2, user.getPassword());
-				result = st.executeQuery();
 
-				if (result.next()) {
-					Servidor.getLog().append(
-							"El usuario " + user.getUsername() + " ha iniciado sesión." + System.lineSeparator());
-					return true;
-				}
+		ResultSet result = null;
+		try {
+			PreparedStatement st = connect
+					.prepareStatement("SELECT * FROM registro WHERE usuario = ? AND password = ? ");
+			st.setString(1, user.getUsername());
+			st.setString(2, user.getPassword());
+			result = st.executeQuery();
 
-				Servidor.getLog().append("El usuario " + user.getUsername()
-						+ " ha realizado un intento fallido de inicio de sesión." + System.lineSeparator());
-				return false;
+			if (result.next()) {
+				Servidor.getLog().append(
+						"El usuario " + user.getUsername() + " ha iniciado sesión." + System.lineSeparator());
+				return true;
+			}
 
-			} catch (SQLException e) {
-				
-				e.printStackTrace();
-				return false;
-			} 
-		} else {
-			Servidor.getLog().append(
-						"El usuario " + user.getUsername() + " ya había iniciado sesión." + System.lineSeparator());
+			Servidor.getLog().append("El usuario " + user.getUsername()
+			+ " ha realizado un intento fallido de inicio de sesión." + System.lineSeparator());
 			return false;
-		}
 
+		} catch (SQLException e) {
+
+			e.printStackTrace();
+			return false;
+		} 
 	}
-		
+
 	public boolean registrarSala(PaqueteSala paqueteSala) {
 		ResultSet result = null;
 		try {
@@ -127,7 +110,7 @@ public class Conector {
 			return false;
 		}
 	}
-	
+
 	public boolean eliminarSala(PaqueteSala paqueteSala) {
 		try {
 			PreparedStatement st = connect.prepareStatement("DELETE FROM Salas WHERE Name = ? ");
@@ -141,7 +124,7 @@ public class Conector {
 			return false;
 		}
 	}
-	
+
 	public boolean guardarChatSala(PaqueteMensajeSala msjSalas) {
 		try {
 			PreparedStatement st = connect.prepareStatement("UPDATE Salas SET Chat = Chat || ? WHERE Name = ?");
@@ -161,32 +144,32 @@ public class Conector {
 	public PaqueteUsuario getUsuario(String usuario) {
 		ResultSet result = null;
 		PreparedStatement st;
-		
+
 		try {
 			st = connect.prepareStatement("SELECT * FROM registro WHERE usuario = ?");
 			st.setString(1, usuario);
 			result = st.executeQuery();
 
 			String password = result.getString("password");
-			
+
 			PaqueteUsuario paqueteUsuario = new PaqueteUsuario();
 			paqueteUsuario.setUsername(usuario);
 			paqueteUsuario.setPassword(password);
-			
+
 			return paqueteUsuario;
 		} catch (SQLException e) {
 			Servidor.getLog().append("Fallo al intentar recuperar el usuario " + usuario + System.lineSeparator());
 			Servidor.getLog().append(e.getMessage() + System.lineSeparator());
 			e.printStackTrace();
 		}
-		
+
 		return new PaqueteUsuario();
 	}
 
 	public void cargarSalasExistentes() {
 		ResultSet result = null;
 		PreparedStatement st;
-		
+
 		try {
 			st = connect.prepareStatement("SELECT COUNT (*) FROM Salas");
 			result = st.executeQuery();
@@ -206,16 +189,16 @@ public class Conector {
 			Servidor.getLog().append(e.getMessage() + System.lineSeparator());
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 
 	public HashMap<String, String> cargarPalabrasClaveChatBot() {
 		ResultSet result = null;
 		PreparedStatement st;
-		
+
 		HashMap palabras = new HashMap();
-		
+
 		try {
 			st = connect.prepareStatement("SELECT * FROM sinonimos");
 			result = st.executeQuery();
@@ -230,10 +213,30 @@ public class Conector {
 			Servidor.log.append(e.getMessage() + System.lineSeparator());
 			e.printStackTrace();
 		}
-		
+
 		return palabras;
-		
+
 	}
 
-	
+	public boolean yaRegistrado(String user) {
+		ResultSet result = null;
+		try {
+			PreparedStatement st1 = connect.prepareStatement("SELECT * FROM registro WHERE usuario= ? ");
+			st1.setString(1, user);
+			result = st1.executeQuery();
+
+			if (!result.next()) {
+				return false;
+			} else {
+				Servidor.getLog().append("El usuario " + user + " ya se encuentra en uso." + System.lineSeparator());
+				return true;
+			}
+		} catch (SQLException ex) {
+			Servidor.getLog().append("Eror al intentar verificar si el usuario " + user + " ya se encontraba en uso." + System.lineSeparator());
+			System.err.println(ex.getMessage());
+			return false;
+		}
+	}
+
+
 }
