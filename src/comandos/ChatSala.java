@@ -28,7 +28,6 @@ public class ChatSala extends ComandoServer{
 			Servidor.getConector().guardarChatSala(paqueteMensaje);
 		} catch (IOException e) {
 			Servidor.getLog().append("Error al enviar el mensaje de " + paqueteMensaje.getUserEmisor() + " para la sala "+ paqueteMensaje.getNombreSala() + System.lineSeparator());
-			e.printStackTrace();
 		}
 		
 	}

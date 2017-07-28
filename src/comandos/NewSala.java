@@ -32,7 +32,6 @@ public class NewSala extends ComandoServer{
 			}
 		} catch (IOException e) {
 			Servidor.getLog().append("Error al intentar informar al usuario " + escuchaCliente.getPaqueteUsuario().getUsername() + " que no se pudo crear la sala " + paqueteSala.getNombreSala() + System.lineSeparator());
-			e.printStackTrace();
 		}		
 	}
 

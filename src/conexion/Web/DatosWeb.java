@@ -119,8 +119,7 @@ public final class DatosWeb {
 			JSONObject j = DatosWeb.getJSONFromURL("https://script.google.com/macros/s/AKfycbyd5AcbAnWi2Yn0xhFRbyzS4qMq1VucMVgVvhul5XqS9HkAyJY/exec?tz="  +  husoHorario);
 			return new SimpleDateFormat("dd-mm-yyyy HH:mm:ss").parse(j.getInt("day") + "-" + j.getInt("month") + "-" + j.getInt("year") + " " + j.getInt("hours") + ":" + j.getInt("minutes") + ":" + j.getInt("seconds"));
 		} catch (Exception e) {
-			Servidor.getLog().append("No se pudo obtener la Fecha. DatosWeb->getFechaHora");
-			e.printStackTrace();
+			Servidor.getLog().append("No se pudo obtener la Fecha. DatosWeb->getFechaHora DATOSWEB");
 			return null;
 		}
 	}
@@ -138,8 +137,7 @@ public final class DatosWeb {
 		    if (r.equals("N/A")) return null;
 		    else return r;
 		} catch (IOException e) {
-			e.printStackTrace();
-			System.err.println("No se pudo encontrar la direccion web");
+			Servidor.getLog().append("No se pudo encontrar los datos en getLocalizacion DATOSWEB");
 			return null;
 		}
 	}
@@ -156,7 +154,19 @@ public final class DatosWeb {
 			j = DatosWeb.getJSONFromURL("http://api.wolframalpha.com/v2/query?appid=AEQQL7-383JE34XYH&input=\"" + URLEncoder.encode(consulta, "UTF-8") + "\"&includepodid=Result&format=plaintext&output=json&units=metric");
 			return String.valueOf(j.getJSONObject("queryresult").getJSONArray("pods").getJSONObject(0).getJSONArray("subpods").getJSONObject(0).get("plaintext"));
 		} catch (Exception e) {
-			System.err.println("No se pudo encontrar los datos");
+			Servidor.getLog().append("No se pudo encontrar los datos en wolfram DATOSWEB");
+			return null;
+		}
+	}
+	
+	public static String getFechita(String americaYOtros) {
+		try {
+			JSONObject j = DatosWeb.getJSONFromURL("http://api.timezonedb.com/v2/get-time-zone?key=J74Q9QN1RN7M&format=json&by=zone&zone=" + americaYOtros);
+			String h = j.getString("formatted");
+			return h;
+			//return new SimpleDateFormat("dd-mm-yyyy HH:mm:ss").parse(j.getInt("day")+"-"+j.getInt("month")+"-"+j.getInt("year")+" "+j.getInt("hours")+":"+j.getInt("minutes")+":"+j.getInt("seconds"));
+		} catch (Exception e) {
+			Servidor.getLog().append("No se pudo encontrar los datos en getFechita DATOSWEB");
 			return null;
 		}
 	}

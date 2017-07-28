@@ -45,7 +45,6 @@ public class InicioSesion extends ComandoServer {
 			}
 		} catch (JsonSyntaxException | IOException e) {
 			Servidor.getLog().append("Fallo al intentar informar al usuario "+ paqueteUsuario.getUsername() + " sobre su intento de inicio de sesión." + System.lineSeparator());
-			e.printStackTrace();
 		} 
 	}
 }

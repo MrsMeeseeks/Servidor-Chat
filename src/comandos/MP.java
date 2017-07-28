@@ -25,7 +25,6 @@ public class MP  extends ComandoServer{
 			} 
 		} catch (IOException e) {
 			Servidor.getLog().append("Error al intentar enviar el mensaje de " + paqueteMensaje.getUserEmisor() + "para "+ paqueteMensaje.getUserReceptor() + System.lineSeparator());
-			e.printStackTrace();
 		}
 		
 	}

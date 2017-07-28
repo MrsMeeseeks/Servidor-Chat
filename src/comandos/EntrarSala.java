@@ -35,7 +35,6 @@ public class EntrarSala extends ComandoServer {
 			}
 		} catch (IOException e) {
 			Servidor.getLog().append("Error al intentar informar al usuario " + escuchaCliente.getPaqueteUsuario().getUsername() + " sobre el intento de entrar a la sala " + paqueteSala.getNombreSala() + System.lineSeparator() );
-			e.printStackTrace();
 		}
 
 		

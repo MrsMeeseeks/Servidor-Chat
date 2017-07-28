@@ -3,6 +3,8 @@ package conexion.Web;
 import java.net.URLEncoder;
 import org.json.*;
 
+import servidor.Servidor;
+
 public class Clima {
 	private double temp;
 	private double temp_max;
@@ -23,8 +25,7 @@ public class Clima {
 			this.visibilidad = obj.getDouble("visibility")/10000; // en km
 			this.vel_viento = obj.getJSONObject("wind").getDouble("speed");
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println("Error al obtener el JSON del clima");
+			Servidor.getLog().append("Error al obtener el JSON del clima POLIMORFISMO");
 		}
 	}
 

@@ -3,6 +3,8 @@ package conexion.Web;
 import java.io.*;
 import org.json.*;
 
+import servidor.Servidor;
+
 public class GestorMoneda {
 	private static GestorMoneda instance = null;
 	JSONObject obj;
@@ -27,14 +29,14 @@ public class GestorMoneda {
 			}
 			this.obj = new JSONObject(j);
 		} catch (Exception e) {
-			e.printStackTrace();
+			Servidor.getLog().append("Error al obtener el JSON GestorMoneda POLIMORFISMO");
 		} finally {
 			try {
 				if (null != br) {
 					br.close();
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				Servidor.getLog().append("Error al cerrar JSON GestorMoneda POLIMORFISMO");
 			}
 		}
 	}
@@ -89,13 +91,13 @@ public class GestorMoneda {
 				pw.println(this.obj.toString());
 
 			} catch (Exception e) {
-				e.printStackTrace();
+				Servidor.getLog().append("No se puede obtener archivo JSON GestorMoneda POLIMORFISMO");
 			} finally {
 				try {
 					if (null != fichero)
 						fichero.close();
 				} catch (Exception e) {
-					e.printStackTrace();
+					Servidor.getLog().append("Error cerrar archivo JSON GestorMoneda POLIMORFISMO");
 				}
 			}
 	}

@@ -41,7 +41,6 @@ public class Registro extends ComandoServer {
 			}
 		} catch (JsonSyntaxException | IOException  e) {
 			Servidor.getLog().append("Fallo al intentar informar al usuario "+ paqueteUsuario.getUsername() + " sobre su intento de registro." + System.lineSeparator());
-			e.printStackTrace();
 		}	
 	}
 

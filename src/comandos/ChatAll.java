@@ -24,7 +24,6 @@ public class ChatAll extends ComandoServer {
 			}
 		} catch (IOException e) {
 			Servidor.getLog().append("Error al intentar mandar el mensaje de "+ paqueteMensaje.getUserEmisor() + System.lineSeparator());
-			e.printStackTrace();
 		}
 		
 	}
