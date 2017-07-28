@@ -177,28 +177,29 @@ public class Conector {
 	}
 
 
-	public HashMap<String, String> cargarPalabrasClaveChatBot() {
+	public boolean cargarPalabrasClaveChatBot() {
 		ResultSet result = null;
 		PreparedStatement st;
-
-		HashMap palabras = new HashMap();
-
+		
+		HashMap<String, String> sinonimos = new HashMap<>();
+		
 		try {
 			st = connect.prepareStatement("SELECT * FROM sinonimos");
 			result = st.executeQuery();
 			int cant = result.getInt(1);
 			for (int i = 0; i< cant; i++) {
-				palabras.put(result.getString("palabraA"), result.getString("palabraB"));
+				sinonimos.put(result.getString("palabraA").toLowerCase(), result.getString("palabraB").toLowerCase());
 				result.next();
 			}
-			Servidor.log.append("Se cargaron las salas existentes en la base de datos con éxito." + System.lineSeparator());
+			Servidor.alfred = new ChatBot(sinonimos);
+			Servidor.log.append("Se cargo Alfred correctamente." + System.lineSeparator());
+			return true;
 		} catch (SQLException e) {
-			Servidor.log.append("Error al intentar cargar las salas existentes en la base de datos." + System.lineSeparator());
+			Servidor.log.append("Error al intentar cargar Alfred." + System.lineSeparator());
 			Servidor.log.append(e.getMessage() + System.lineSeparator());
 			e.printStackTrace();
+			return false;
 		}
-
-		return palabras;
 
 	}
 
@@ -239,6 +240,4 @@ public class Conector {
 			return true;
 		}
 	}
-
-
 }

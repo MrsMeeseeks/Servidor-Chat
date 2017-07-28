@@ -34,6 +34,8 @@ public class Servidor extends Thread {
 	
 	public static ArrayList<String> salasNombresDisponibles = new ArrayList<String>();
 	public static Map<String, PaqueteSala> salas = new HashMap<>();
+	
+	
 
 	private static ServerSocket serverSocket;
 	private final int puerto = 1234;
@@ -47,6 +49,7 @@ public class Servidor extends Thread {
 	public static AtencionConexiones atencionConexiones;
 	public static AtencionNuevasSalas atencionNuevasSalas;
 	public static AtencionConexionesSalas atencionConexionesSalas;
+	public static ChatBot alfred;
 
 	public static void main(String[] args) {
 		cargarInterfaz();
@@ -158,6 +161,51 @@ public class Servidor extends Thread {
 		ventana.setVisible(true);
 	}
 
+	
+	@Override
+	public void run() {
+		try {
+			conexionDB = new Conector();
+			conexionDB.connect();
+			estadoServer = true;
+			getLog().append("Iniciando el servidor..." + System.lineSeparator());
+			serverSocket = new ServerSocket(puerto);
+			getLog().append("Servidor esperando conexiones..." + System.lineSeparator());
+			String ipRemota;
+
+			conexionDB.cargarSalasExistentes();
+			conexionDB.cargarPalabrasClaveChatBot();
+
+			alfred.start();
+			atencionConexiones = new AtencionConexiones();
+			atencionConexiones.start();
+			atencionNuevasSalas = new AtencionNuevasSalas();
+			atencionNuevasSalas.start();
+			atencionConexionesSalas = new AtencionConexionesSalas();
+			atencionConexionesSalas.start();
+
+
+			while (estadoServer) {
+				Socket cliente = serverSocket.accept();
+				//Agrego el Socket a la lista de Sockets
+				SocketsConectados.add(cliente);
+
+				ipRemota = cliente.getInetAddress().getHostAddress();
+				getLog().append(ipRemota + " se ha conectado" + System.lineSeparator());
+
+				ObjectOutputStream salida = new ObjectOutputStream(cliente.getOutputStream());
+				ObjectInputStream entrada = new ObjectInputStream(cliente.getInputStream());
+
+				EscuchaCliente atencion = new EscuchaCliente(ipRemota, cliente, entrada, salida);
+				atencion.start();
+				clientesConectados.add(atencion);
+			}
+		} catch (Exception e) {
+			getLog().append("Fallo la conexión." + System.lineSeparator());
+			e.printStackTrace();
+		}
+	}
+	
 	public static Map<String, Socket> getMapConectados() {
 		return mapConectados;
 	}
@@ -190,45 +238,13 @@ public class Servidor extends Thread {
 		Servidor.atencionConexionesSalas = atencionConexionesSalas;
 	}
 
-	@Override
-	public void run() {
-		try {
-			conexionDB = new Conector();
-			conexionDB.connect();
-			estadoServer = true;
-			getLog().append("Iniciando el servidor..." + System.lineSeparator());
-			serverSocket = new ServerSocket(puerto);
-			getLog().append("Servidor esperando conexiones..." + System.lineSeparator());
-			String ipRemota;
 
-			conexionDB.cargarSalasExistentes();
+	public static ChatBot getAlfred() {
+		return alfred;
+	}
 
-			atencionConexiones = new AtencionConexiones();
-			atencionConexiones.start();
-			atencionNuevasSalas = new AtencionNuevasSalas();
-			atencionNuevasSalas.start();
-			atencionConexionesSalas = new AtencionConexionesSalas();
-			atencionConexionesSalas.start();
-
-			while (estadoServer) {
-				Socket cliente = serverSocket.accept();
-				//Agrego el Socket a la lista de Sockets
-				SocketsConectados.add(cliente);
-
-				ipRemota = cliente.getInetAddress().getHostAddress();
-				getLog().append(ipRemota + " se ha conectado" + System.lineSeparator());
-
-				ObjectOutputStream salida = new ObjectOutputStream(cliente.getOutputStream());
-				ObjectInputStream entrada = new ObjectInputStream(cliente.getInputStream());
-
-				EscuchaCliente atencion = new EscuchaCliente(ipRemota, cliente, entrada, salida);
-				atencion.start();
-				clientesConectados.add(atencion);
-			}
-		} catch (Exception e) {
-			getLog().append("Fallo la conexión." + System.lineSeparator());
-			e.printStackTrace();
-		}
+	public static void setAlfred(ChatBot alfred) {
+		Servidor.alfred = alfred;
 	}
 
 	public static ArrayList<EscuchaCliente> getClientesConectados() {
