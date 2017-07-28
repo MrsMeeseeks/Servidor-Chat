@@ -184,11 +184,16 @@ public class Conector {
 		HashMap<String, String> sinonimos = new HashMap<>();
 		
 		try {
-			st = connect.prepareStatement("SELECT * FROM sinonimos");
+			st = connect.prepareStatement("SELECT COUNT (*) FROM sinonimos");
 			result = st.executeQuery();
 			int cant = result.getInt(1);
+			
+			st = connect.prepareStatement("SELECT * FROM sinonimos");
+			result = st.executeQuery();
+			result.next();
+			
 			for (int i = 0; i< cant; i++) {
-				sinonimos.put(result.getString("palabraA").toLowerCase(), result.getString("palabraB").toLowerCase());
+				sinonimos.put(result.getString("palabraA").toLowerCase(), result.getString("palabraB"));
 				result.next();
 			}
 			Servidor.alfred = new ChatBot(sinonimos);
@@ -205,19 +210,25 @@ public class Conector {
 
 	public boolean yaRegistrado(String user) {
 		ResultSet result = null;
-		try {
-			PreparedStatement st1 = connect.prepareStatement("SELECT * FROM registro WHERE usuario= ? ");
-			st1.setString(1, user);
-			result = st1.executeQuery();
+		if (!user.toLowerCase().equals("chatbot")) {
+			try {
+				PreparedStatement st1 = connect.prepareStatement("SELECT * FROM registro WHERE usuario= ? ");
+				st1.setString(1, user);
+				result = st1.executeQuery();
 
-			if (!result.next()) {
+				if (!result.next()) {
+					return false;
+				} else {
+					Servidor.getLog()
+							.append("El usuario " + user + " ya se encuentra en uso." + System.lineSeparator());
+					return true;
+				}
+			} catch (SQLException ex) {
+				Servidor.getLog().append("Eror al intentar verificar si el usuario " + user
+						+ " ya se encontraba en uso." + System.lineSeparator());
 				return false;
-			} else {
-				Servidor.getLog().append("El usuario " + user + " ya se encuentra en uso." + System.lineSeparator());
-				return true;
-			}
-		} catch (SQLException ex) {
-			Servidor.getLog().append("Eror al intentar verificar si el usuario " + user + " ya se encontraba en uso." + System.lineSeparator());
+			} 
+		} else {
 			return false;
 		}
 	}
