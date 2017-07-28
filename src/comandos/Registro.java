@@ -24,12 +24,8 @@ public class Registro extends ComandoServer {
 					pus.setComando(Comando.REGISTRO);
 					pus.setMsj(Paquete.msjExito);
 
-					Servidor.getUsuariosConectados().add(paqueteUsuario.getUsername());
-
-					int index = Servidor.getUsuariosConectados().indexOf(paqueteUsuario.getUsername());
-					Servidor.getMapConectados().put(paqueteUsuario.getUsername(),
-							Servidor.getSocketsConectados().get(index));
-
+					Servidor.conectarUsuario(paqueteUsuario.getUsername());
+					
 					escuchaCliente.getSalida().writeObject(gson.toJson(pus));
 
 					synchronized (Servidor.getAtencionConexiones()) {

@@ -18,9 +18,9 @@ public class AtencionConexionesSalas extends Thread {
 		synchronized (this) {
 			try {
 				while (true) {
-					// Espero a que se conecte alguien
+
 					wait();
-					// Le reenvio la conexion a todos
+
 					if (nombreSala != null) {
 						PaqueteSala ps = Servidor.getSalas().get(nombreSala);						
 						ps.setComando(Comando.CONEXIONSALA);
@@ -28,9 +28,7 @@ public class AtencionConexionesSalas extends Thread {
 						for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
 							if (ps.getUsuariosConectados()
 									.contains(conectado.getPaqueteUsuario().getUsername())) {
-								if (conectado.getPaqueteUsuario().getEstado()) {
-									conectado.getSalida().writeObject(s);
-								}	
+								conectado.getSalida().writeObject(s);
 							}
 						}
 					}

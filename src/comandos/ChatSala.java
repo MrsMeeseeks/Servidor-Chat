@@ -22,10 +22,8 @@ public class ChatSala extends ComandoServer{
 					conectado.getSalida().writeObject(gson.toJson(paqueteMensaje));
 				}
 			}
-			String msjAgregar = paqueteMensaje.getUserEmisor() + ": " + paqueteMensaje.getMsj() + "\n";
-			String chatAnterior = Servidor.getSalas().get(paqueteMensaje.getNombreSala()).getHistorial();
-			
-			Servidor.getSalas().get(paqueteMensaje.getNombreSala()).setHistorial(chatAnterior + msjAgregar);
+			String msjAgregar = paqueteMensaje.getUserEmisor() + ": " + paqueteMensaje.getMsj() + "\n";			
+			Servidor.getSalas().get(paqueteMensaje.getNombreSala()).agregarMsj(msjAgregar);
 
 			Servidor.getConector().guardarChatSala(paqueteMensaje);
 		} catch (IOException e) {

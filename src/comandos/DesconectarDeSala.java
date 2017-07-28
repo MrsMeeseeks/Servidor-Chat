@@ -16,7 +16,7 @@ public class DesconectarDeSala extends ComandoServer {
 			if(Servidor.getNombresSalasDisponibles().contains(paqueteSala.getNombreSala()) 
 					&& Servidor.getSalas().get(paqueteSala.getNombreSala()).getUsuariosConectados().contains(paqueteSala.getCliente())) {
 				
-				Servidor.getSalas().get(paqueteSala.getNombreSala()).getUsuariosConectados().remove(paqueteSala.getCliente());
+				Servidor.getSalas().get(paqueteSala.getNombreSala()).eliminarUsuario(paqueteSala.getCliente());
 				paqueteSala = Servidor.getSalas().get(paqueteSala.getNombreSala());
 				paqueteSala.setComando(Comando.DESCONECTARDESALA);
 				

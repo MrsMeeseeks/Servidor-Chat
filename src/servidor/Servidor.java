@@ -347,4 +347,28 @@ public class Servidor extends Thread {
 	public static void setLog(TextArea log) {
 		Servidor.log = log;
 	}
+
+	public static void eliminarSalaDisponible(String nombreSala) {
+		salasNombresDisponibles.remove(nombreSala);
+		salas.remove(nombreSala);
+	}
+
+	public static void conectarUsuario(String username) {
+		UsuariosConectados.add(username);
+		int index = Servidor.getUsuariosConectados().indexOf(username);
+		mapConectados.put(username, SocketsConectados.get(index));
+	}
+
+	public static void agregarSalaDisponible(PaqueteSala paqueteSala) {
+		salasNombresDisponibles.add(paqueteSala.getNombreSala());
+		salas.put(paqueteSala.getNombreSala(), paqueteSala);
+	}
+
+	public static void desconectarUsuario(String username, EscuchaCliente escuchaCliente) {
+		int index = Servidor.UsuariosConectados.indexOf(username);
+		SocketsConectados.remove(index);
+		mapConectados.remove(username);
+		UsuariosConectados.remove(username);
+		clientesConectados.remove(escuchaCliente);
+	}
 }

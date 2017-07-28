@@ -15,8 +15,9 @@ public class EntrarSala extends ComandoServer {
 		PaqueteSala paqueteSala = (PaqueteSala) (gson.fromJson(cadenaLeida, PaqueteSala.class));
 		paqueteSala.setComando(Comando.ENTRARSALA);
 		try {
-			if(Servidor.getNombresSalasDisponibles().contains(paqueteSala.getNombreSala())) {
-				Servidor.getSalas().get(paqueteSala.getNombreSala()).getUsuariosConectados().add(paqueteSala.getCliente());
+			if(Servidor.getNombresSalasDisponibles().contains(paqueteSala.getNombreSala())
+					&& !Servidor.getSalas().get(paqueteSala.getNombreSala()).getUsuariosConectados().contains(paqueteSala.getCliente())) {
+				Servidor.getSalas().get(paqueteSala.getNombreSala()).agregarUsuario(paqueteSala.getCliente());
 				paqueteSala = Servidor.getSalas().get(paqueteSala.getNombreSala());
 				paqueteSala.setMsj(Paquete.msjExito);
 				paqueteSala.setComando(Comando.ENTRARSALA);

@@ -13,16 +13,21 @@ public class NewSala extends ComandoServer{
 	public void ejecutar() {
 		PaqueteSala paqueteSala = (PaqueteSala) (gson.fromJson(cadenaLeida, PaqueteSala.class));
 		try {
-			if(Servidor.getConector().registrarSala(paqueteSala)){
-				Servidor.getNombresSalasDisponibles().add(paqueteSala.getNombreSala());
-				Servidor.getSalas().put(paqueteSala.getNombreSala(),paqueteSala);
+			if (!Servidor.getConector().salaYaExistente(paqueteSala.getNombreSala())) {
+				if (Servidor.getConector().registrarSala(paqueteSala)) {
 
-				synchronized(Servidor.getAtencionNuevasSalas()){
-					Servidor.getAtencionNuevasSalas().notify();
-				}
+					Servidor.agregarSalaDisponible(paqueteSala);
+					synchronized (Servidor.getAtencionNuevasSalas()) {
+						Servidor.getAtencionNuevasSalas().notify();
+					}
+				} else {
+					paqueteSala.setComando(Comando.NEWSALA);
+					paqueteSala.setMsj(Paquete.msjFracaso);
+					escuchaCliente.getSalida().writeObject(gson.toJson(paqueteSala));
+				} 
 			} else {
 				paqueteSala.setComando(Comando.NEWSALA);
-				paqueteSala.setMsj(Paquete.msjFracaso);
+				paqueteSala.setMsj(Paquete.msjFallo);
 				escuchaCliente.getSalida().writeObject(gson.toJson(paqueteSala));
 			}
 		} catch (IOException e) {

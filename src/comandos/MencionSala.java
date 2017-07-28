@@ -25,10 +25,8 @@ public class MencionSala extends ComandoServer {
 					}
 				}
 				String msjAgregar = paqueteMensaje.getUserEmisor() + ": " + paqueteMensaje.getMsj() + "\n";
-				String chatAnterior = Servidor.getSalas().get(paqueteMensaje.getNombreSala()).getHistorial();
 				
-				Servidor.getSalas().get(paqueteMensaje.getNombreSala()).setHistorial(chatAnterior + msjAgregar);
-
+				Servidor.getSalas().get(paqueteMensaje).agregarMsj(msjAgregar);
 				Servidor.getConector().guardarChatSala(paqueteMensaje);
 			}
 		} catch (IOException e) {

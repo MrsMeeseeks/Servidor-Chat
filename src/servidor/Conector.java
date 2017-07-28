@@ -49,7 +49,6 @@ public class Conector {
 			return true;
 		} catch (SQLException ex) {
 			Servidor.getLog().append("Eror al intentar registrar el usuario " + user.getUsername() + System.lineSeparator());
-			System.err.println(ex.getMessage());
 			return false;
 		}
 	}
@@ -83,28 +82,16 @@ public class Conector {
 	}
 
 	public boolean registrarSala(PaqueteSala paqueteSala) {
-		ResultSet result = null;
 		try {
-			PreparedStatement st1 = connect.prepareStatement("SELECT * FROM Salas WHERE Name = ? ");
-			st1.setString(1, paqueteSala.getNombreSala());
-			result = st1.executeQuery();
-
-			if (!result.next()) {
-
-				PreparedStatement st = connect.prepareStatement("INSERT INTO Salas (Name, Chat, Owner) VALUES (?,?,?)");
-				st.setString(1, paqueteSala.getNombreSala());
-				st.setString(2, paqueteSala.getHistorial());
-				st.setString(3, paqueteSala.getOwnerSala());
-				st.execute();
-				Servidor.getLog().append("La sala  " + paqueteSala.getNombreSala() + " se ha registrado." + System.lineSeparator());
-				return true;
-			} else {
-				Servidor.getLog().append("La sala " + paqueteSala.getNombreSala() + " ya se existe." + System.lineSeparator());
-				return false;
-			}
+			PreparedStatement st = connect.prepareStatement("INSERT INTO Salas (Name, Chat, Owner) VALUES (?,?,?)");
+			st.setString(1, paqueteSala.getNombreSala());
+			st.setString(2, paqueteSala.getHistorial());
+			st.setString(3, paqueteSala.getOwnerSala());
+			st.execute();
+			Servidor.getLog().append("La sala  " + paqueteSala.getNombreSala() + " se ha registrado." + System.lineSeparator());
+			return true;
 		} catch (SQLException ex) {
 			Servidor.getLog().append("Eror al intentar registrar la sala " + paqueteSala.getNombreSala() + System.lineSeparator());
-			System.err.println(ex.getMessage());
 			return false;
 		}
 	}
@@ -118,7 +105,6 @@ public class Conector {
 			return true;
 		} catch (SQLException ex) {
 			Servidor.getLog().append("Eror al intentar eliminar la sala " + paqueteSala.getNombreSala() + System.lineSeparator());
-			System.err.println(ex.getMessage());
 			return false;
 		}
 	}
@@ -231,8 +217,26 @@ public class Conector {
 			}
 		} catch (SQLException ex) {
 			Servidor.getLog().append("Eror al intentar verificar si el usuario " + user + " ya se encontraba en uso." + System.lineSeparator());
-			System.err.println(ex.getMessage());
 			return false;
+		}
+	}
+
+	public boolean salaYaExistente(String sala) {
+		ResultSet result = null;
+		try {
+			PreparedStatement st1 = connect.prepareStatement("SELECT * FROM Salas WHERE Name = ? ");
+			st1.setString(1, sala);
+			result = st1.executeQuery();
+
+			if (!result.next()) {
+				Servidor.getLog().append("La sala " + sala + " ya se existe." + System.lineSeparator());
+				return false;
+			} else {
+				return true;
+			}
+		} catch (SQLException ex) {
+			Servidor.getLog().append("Eror al intentar verificar si la sala " + sala + " ya existe."  + System.lineSeparator());
+			return true;
 		}
 	}
 

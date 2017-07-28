@@ -64,11 +64,8 @@ public class EscuchaCliente extends Thread {
 				salida.close();
 				socket.close();
 
-				int index = Servidor.UsuariosConectados.indexOf(paqueteUsuario.getUsername());
-				Servidor.SocketsConectados.remove(index);
-				Servidor.getPersonajesConectados().remove(paqueteUsuario.getUsername());
-				Servidor.getUsuariosConectados().remove(paqueteUsuario.getUsername());
-				Servidor.getClientesConectados().remove(this);
+				Servidor.desconectarUsuario(paqueteUsuario.getUsername(),this);
+				
 				for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
 					paqueteDeUsuarios = new PaqueteDeUsuariosYSalas(Servidor.getUsuariosConectados());
 					paqueteDeUsuarios.setComando(Comando.CONEXION);

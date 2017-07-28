@@ -17,14 +17,11 @@ public class ChatAll extends ComandoServer {
 			paqueteMensaje.setComando(Comando.CHATALL);
 
 			Socket s1 = Servidor.getMapConectados().get(paqueteMensaje.getUserEmisor());
-			int count = 0;
 			for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
 				if(conectado.getSocket() != s1)	{
 					conectado.getSalida().writeObject(gson.toJson(paqueteMensaje));
-					count++;
 				}
 			}
-			Servidor.mensajeAAll(count);
 		} catch (IOException e) {
 			Servidor.getLog().append("Error al intentar mandar el mensaje de "+ paqueteMensaje.getUserEmisor() + System.lineSeparator());
 			e.printStackTrace();

@@ -17,8 +17,7 @@ public class EliminarSala extends ComandoServer {
 		try {
 			if(paqueteSala.getCliente().equals(Servidor.getSalas().get(paqueteSala.getNombreSala()).getOwnerSala())){
 				if(Servidor.getConector().eliminarSala(paqueteSala)){
-					Servidor.getNombresSalasDisponibles().remove(paqueteSala.getNombreSala());
-					Servidor.getSalas().remove(paqueteSala.getNombreSala());
+					Servidor.eliminarSalaDisponible(paqueteSala.getNombreSala());
 					paqueteSala.setComando(Comando.ELIMINARSALA);
 					paqueteSala.setMsj(Paquete.msjExito);
 					for (EscuchaCliente conectado : Servidor.getClientesConectados()) {

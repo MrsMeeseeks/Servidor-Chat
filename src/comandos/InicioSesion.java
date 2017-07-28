@@ -27,12 +27,8 @@ public class InicioSesion extends ComandoServer {
 					pus.setComando(Comando.INICIOSESION);
 					pus.setMsj(Paquete.msjExito);
 
-					Servidor.getUsuariosConectados().add(paqueteUsuario.getUsername());
-					// Consigo el socket, y entonces ahora pongo el username y el socket en el map
-					int index = Servidor.getUsuariosConectados().indexOf(paqueteUsuario.getUsername());
-					Servidor.getMapConectados().put(paqueteUsuario.getUsername(),
-							Servidor.getSocketsConectados().get(index));
-
+					Servidor.conectarUsuario(paqueteUsuario.getUsername());
+					
 					escuchaCliente.getSalida().writeObject(gson.toJson(pus));
 
 					synchronized (Servidor.getAtencionConexiones()) {

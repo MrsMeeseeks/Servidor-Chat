@@ -17,16 +17,14 @@ public class AtencionConexiones extends Thread {
 		synchronized (this) {
 			try {
 				while (true) {
-					// Espero a que se conecte alguien
+
 					wait();
-					// Le reenvio la conexion a todos
 					PaqueteDeUsuariosYSalas pdu = (PaqueteDeUsuariosYSalas) new PaqueteDeUsuariosYSalas(Servidor.getUsuariosConectados(), Servidor.getNombresSalasDisponibles())
 							.clone();
 					pdu.setComando(Comando.CONEXION);
 					String s = gson.toJson(pdu);
 					for (EscuchaCliente conectado : Servidor.getClientesConectados())
-						if (conectado.getPaqueteUsuario().getEstado())
-							conectado.getSalida().writeObject(s);
+						conectado.getSalida().writeObject(s);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
