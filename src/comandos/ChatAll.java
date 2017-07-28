@@ -15,7 +15,7 @@ public class ChatAll extends ComandoServer {
 		PaqueteMensaje paqueteMensaje = (PaqueteMensaje) (gson.fromJson(cadenaLeida, PaqueteMensaje.class));
 		try {
 			paqueteMensaje.setComando(Comando.CHATALL);
-
+			
 			Socket s1 = Servidor.getMapConectados().get(paqueteMensaje.getUserEmisor());
 			for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
 				if(conectado.getSocket() != s1)	{

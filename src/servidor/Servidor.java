@@ -9,14 +9,17 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
+import org.json.JSONObject;
 
 import paqueteEnvios.PaqueteMensaje;
 import paqueteEnvios.PaqueteSala;
@@ -26,17 +29,17 @@ import java.awt.Color;
 import java.awt.Font;
 
 public class Servidor extends Thread {
-	
+
 	public static ArrayList<Socket> SocketsConectados = new ArrayList<Socket>();
 	public static ArrayList<String> UsuariosConectados = new ArrayList<String>();
 	private static ArrayList<EscuchaCliente> clientesConectados = new ArrayList<>();
 	public static Map<String, Socket> mapConectados = new HashMap<>();
-	
+
 	public static ArrayList<String> salasNombresDisponibles = new ArrayList<String>();
 	public static Map<String, PaqueteSala> salas = new HashMap<>();
-	
-	
 
+
+	private static String ciudad;
 	private static ServerSocket serverSocket;
 	private final int puerto = 1234;
 	private static Conector conexionDB;
@@ -98,7 +101,7 @@ public class Servidor extends Thread {
 				btnIniciar.requestFocus();
 			}
 		});
-		
+
 
 		ventana.getContentPane().add(btnIniciar);
 		ventana.getRootPane().setDefaultButton(btnIniciar);
@@ -161,7 +164,7 @@ public class Servidor extends Thread {
 		ventana.setVisible(true);
 	}
 
-	
+
 	@Override
 	public void run() {
 		try {
@@ -169,6 +172,7 @@ public class Servidor extends Thread {
 			conexionDB.connect();
 			estadoServer = true;
 			getLog().append("Iniciando el servidor..." + System.lineSeparator());
+			cargarCuidad();
 			serverSocket = new ServerSocket(puerto);
 			getLog().append("Servidor esperando conexiones..." + System.lineSeparator());
 			String ipRemota;
@@ -204,7 +208,43 @@ public class Servidor extends Thread {
 			e.printStackTrace();
 		}
 	}
-	
+
+	private void cargarCuidad() {
+		JSONObject j;
+		j = getJSONFromURL("http://ip-api.com/json");
+		if (j!=null) {
+			String r = j.getString("city");
+			if (r.equals("N/A"))
+				ciudad = null;
+			else
+				ciudad = r;
+		} else {
+			ciudad=null;
+			log.append("Error al intentar cargar la ciudad del servidor.");
+		}
+	}
+
+	private JSONObject getJSONFromURL(String dir) {
+		   try {
+				URL url = null;
+				url = new URL(dir);
+				Scanner scan = null;
+				scan = new Scanner(url.openStream(), "UTF-8");
+				String str = new String();
+				while (scan.hasNext()) {
+				    str += scan.nextLine();
+				}
+				scan.close();
+				return new JSONObject(str);
+			} catch (IOException e) {
+				return null;
+			} 
+	}
+
+	public static String getCiudad() {
+		return ciudad; 
+	}
+
 	public static Map<String, Socket> getMapConectados() {
 		return mapConectados;
 	}
@@ -287,7 +327,7 @@ public class Servidor extends Thread {
 			return false;
 		}
 	}
-	
+
 	public static boolean mencionUsuario(PaqueteMensaje paqueteMensaje) {
 		boolean result = true;
 		if(!UsuariosConectados.contains(paqueteMensaje.getUserReceptor())) {
@@ -344,7 +384,7 @@ public class Servidor extends Thread {
 			Servidor.getLog().append("Se ha desconectado un usuario" + System.lineSeparator());
 			return false;
 		}
-		
+
 	}
 
 	public static TextArea getLog() {

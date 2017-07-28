@@ -33,11 +33,12 @@ public class ChatBot extends Thread {
 					wait();
 
 					if (paqueteMensaje!=null) {
-						mensajeRecibido = paqueteMensaje.getMsj();
+						mensajeRecibido = paqueteMensaje.getMsjChat();
 						procesarMensaje();
 						comando = (ComandoChatBot) Class.forName("comandosChatBot" + "." + codigo).newInstance();
 						comando.setNombreSala(paqueteMensaje.getNombreSala());
 						comando.ejecutar();
+						codigo=null;
 					}
 
 				}

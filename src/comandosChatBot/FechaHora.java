@@ -33,15 +33,22 @@ public class FechaHora extends ComandoChatBot{
 			try {
 				PaqueteMensaje paqueteMensaje = new PaqueteMensaje("Alfred", null, msjFinal, nombreSala);
 				paqueteMensaje.setComando(Comando.CHATSALA);
-				for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
-					if (Servidor.getSalas().get(paqueteMensaje.getNombreSala()).getUsuariosConectados()
-							.contains(conectado.getPaqueteUsuario().getUsername())) {
+				if (!nombreSala.equals("Ventana Principal")) {
+					for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
+						if (Servidor.getSalas().get(paqueteMensaje.getNombreSala()).getUsuariosConectados()
+								.contains(conectado.getPaqueteUsuario().getUsername())) {
+							conectado.getSalida().writeObject(gson.toJson(paqueteMensaje));
+						}
+					}
+					String msjAgregar = paqueteMensaje.getUserEmisor() + ": " + paqueteMensaje.getMsjChat() + "\n";
+					Servidor.getSalas().get(paqueteMensaje.getNombreSala()).agregarMsj(msjAgregar);
+					Servidor.getConector().guardarChatSala(paqueteMensaje);
+				} else {
+					paqueteMensaje.setComando(Comando.CHATALL);
+					for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
 						conectado.getSalida().writeObject(gson.toJson(paqueteMensaje));
 					}
 				}
-				String msjAgregar = paqueteMensaje.getUserEmisor() + ": " + paqueteMensaje.getMsj() + "\n";
-				Servidor.getSalas().get(paqueteMensaje.getNombreSala()).agregarMsj(msjAgregar);
-				Servidor.getConector().guardarChatSala(paqueteMensaje);
 			} catch (IOException e) {
 				Servidor.getLog().append("Error al tratar de responder la solicitud de fecha y hora." + System.lineSeparator());
 				e.printStackTrace();
@@ -50,15 +57,14 @@ public class FechaHora extends ComandoChatBot{
 	
 	private String getHusoHorario() {
 		 JSONObject j;
-			try {
-				j = getJSONFromURL("http://ip-api.com/json");
-			    String r = j.getString("timezone");
-			    if (r.equals("N/A")) return null;
-			    else return r;
-			} catch (IOException e) {
-				Servidor.getLog().append("No se pudo encontrar los datos del huso horario.");
-				return null;
-			}
+			j = getJSONFromURL("http://ip-api.com/json");
+			if (j != null) {
+				String r = j.getString("timezone");
+				if (!r.equals("N/A"))
+					return r;
+			} 
+			Servidor.getLog().append("No se pudo encontrar los datos del huso horario.");
+			return null;
 	}
 }
 

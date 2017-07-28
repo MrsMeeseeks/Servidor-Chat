@@ -15,18 +15,21 @@ public abstract class ComandoChatBot extends Comando {
 		this.nombreSala = nombreSala;
 	}
 	
-	public static JSONObject getJSONFromURL(final String dir) 
-			throws IOException {
-	    URL url = null;
-		url = new URL(dir);
-	    Scanner scan = null;
-		scan = new Scanner(url.openStream(), "UTF-8");
-	    String str = new String();
-	    while (scan.hasNext()) {
-	        str += scan.nextLine();
-	    }
-	    scan.close();
-	    return new JSONObject(str);
+	public static JSONObject getJSONFromURL(final String dir)  {
+	    try {
+			URL url = null;
+			url = new URL(dir);
+			Scanner scan = null;
+			scan = new Scanner(url.openStream(), "UTF-8");
+			String str = new String();
+			while (scan.hasNext()) {
+			    str += scan.nextLine();
+			}
+			scan.close();
+			return new JSONObject(str);
+		} catch (IOException e) {
+			return null;
+		} 
 	}
 
 }

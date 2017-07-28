@@ -16,49 +16,69 @@ public class MencionSala extends ComandoServer {
 	public void ejecutar() {
 		PaqueteMensaje paqueteMensaje = (gson.fromJson(cadenaLeida, PaqueteMensaje.class));
 		Socket s2 = Servidor.getMapConectados().get(paqueteMensaje.getUserEmisor());
-		paqueteMensaje.setComando(Comando.MENCIONSALA);
+		paqueteMensaje.setMsj(Paquete.msjExito);
 
-		if (!paqueteMensaje.getUserReceptor().toUpperCase().equals("CHATBOT")) {
-			try {
-				paqueteMensaje.setMsj(Paquete.msjExito);
-				msjAgregar = paqueteMensaje.getUserEmisor() + ": " + paqueteMensaje.getMsjChat() + "\n";
+		try {
+			if(!paqueteMensaje.getNombreSala().equals("Ventana Principal")){
+				paqueteMensaje.setComando(Comando.MENCIONSALA);
 				for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
 					if (Servidor.getSalas().get(paqueteMensaje.getNombreSala()).getUsuariosConectados()
 							.contains(conectado.getPaqueteUsuario().getUsername()) && conectado.getSocket() != s2) {
 						conectado.getSalida().writeObject(gson.toJson(paqueteMensaje));
 					}
 				}
-				Servidor.getSalas().get(paqueteMensaje.getNombreSala()).agregarMsj(msjAgregar);
+				Servidor.getSalas().get(paqueteMensaje.getNombreSala()).agregarMsj(paqueteMensaje.getMsjChat() + "\n");
 				Servidor.getConector().guardarChatSala(paqueteMensaje);
-				if (!Servidor.mencionUsuario(paqueteMensaje)) {
+
+				if (!paqueteMensaje.getUserReceptor().toUpperCase().equals("CHATBOT") && !Servidor.mencionUsuario(paqueteMensaje)) {
 					paqueteMensaje.setMsj(Paquete.msjFracaso);
-					msjAgregar = "El usuario " + paqueteMensaje.getUserReceptor() + " " + " no existe o se encuentra desconectado.";
+					msjAgregar = "El usuario " + paqueteMensaje.getUserReceptor() + " "
+							+ " no existe o se encuentra desconectado.";
 					paqueteMensaje.setMsjChat(msjAgregar);
-					s2=null;
-					Servidor.getSalas().get(paqueteMensaje.getNombreSala()).agregarMsj(msjAgregar);
+					paqueteMensaje.setUserEmisor("Servidor");
+					paqueteMensaje.setComando(Comando.CHATSALA);
+					Servidor.getSalas().get(paqueteMensaje.getNombreSala()).agregarMsj("Servidor:" + msjAgregar + "\n");
 					Servidor.getConector().guardarChatSala(paqueteMensaje);
-					
+
 					for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
 						if (Servidor.getSalas().get(paqueteMensaje.getNombreSala()).getUsuariosConectados()
-								.contains(conectado.getPaqueteUsuario().getUsername()) && conectado.getSocket() != s2) {
+								.contains(conectado.getPaqueteUsuario().getUsername())) {
 							conectado.getSalida().writeObject(gson.toJson(paqueteMensaje));
 						}
-					}  
-				}	
-			} catch (IOException e) {
-				Servidor.getLog().append("Error al intentar enviar el mensaje de " + paqueteMensaje.getUserEmisor() + " para la sala "+ paqueteMensaje.getNombreSala() + "." + System.lineSeparator());
-				e.printStackTrace();
+					}
+				}
+			} else {
+				paqueteMensaje.setComando(Comando.MENCIONSALA);
+				for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
+					if (conectado.getSocket() != s2) {
+						conectado.getSalida().writeObject(gson.toJson(paqueteMensaje));
+					}
+				}
+				if (!paqueteMensaje.getUserReceptor().toUpperCase().equals("CHATBOT") && !Servidor.mencionUsuario(paqueteMensaje)) {
+					paqueteMensaje.setMsj(Paquete.msjFracaso);
+					paqueteMensaje.setComando(Comando.CHATALL);
+					msjAgregar = "El usuario " + paqueteMensaje.getUserReceptor() + " "
+							+ " no existe o se encuentra desconectado.";
+					paqueteMensaje.setMsjChat(msjAgregar);
+					paqueteMensaje.setUserEmisor("Servidor");
+					for (EscuchaCliente conectado : Servidor.getClientesConectados()) 
+						conectado.getSalida().writeObject(gson.toJson(paqueteMensaje));
+
+				}
 			}
-
-
-		} else {
+		} catch (IOException e) {
+			Servidor.getLog().append("Error al intentar enviar el mensaje de " + paqueteMensaje.getUserEmisor() + " para la sala "+ paqueteMensaje.getNombreSala() + "." + System.lineSeparator());
+			e.printStackTrace();
+		}
+		
+		if(paqueteMensaje.getUserReceptor().toUpperCase().equals("CHATBOT")) {
 			synchronized (Servidor.getAlfred()) {
 				Servidor.getAlfred().setPaqueteMensaje(paqueteMensaje);
 				Servidor.getAlfred().notify();
 			}
 		}
-
-
 	}
 
 }
+
+

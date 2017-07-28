@@ -112,7 +112,7 @@ public class Conector {
 	public boolean guardarChatSala(PaqueteMensaje msj) {
 		try {
 			PreparedStatement st = connect.prepareStatement("UPDATE Salas SET Chat = Chat || ? WHERE Name = ?");
-			st.setString(1, msj.getUserEmisor() + ": " + msj.getMsj() + "\n");
+			st.setString(1, msj.getUserEmisor() + ": " + msj.getMsjChat() + "\n");
 			st.setString(2, msj.getNombreSala());
 			st.executeUpdate();
 			return true;

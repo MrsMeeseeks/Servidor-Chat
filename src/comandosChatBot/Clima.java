@@ -22,7 +22,7 @@ public class Clima extends ComandoChatBot {
 
 	@Override
 	public void ejecutar() {
-		String ciudad = getCiudad();
+		String ciudad = Servidor.getCiudad();
 		if (ciudad!=null) {
 			try {
 				JSONObject obj = getJSONFromURL("http://api.openweathermap.org/data/2.5/weather?q="
@@ -48,15 +48,22 @@ public class Clima extends ComandoChatBot {
 		try {
 			PaqueteMensaje paqueteMensaje = new PaqueteMensaje("Alfred", null, msjFinal, nombreSala);
 			paqueteMensaje.setComando(Comando.CHATSALA);
-			for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
-				if (Servidor.getSalas().get(paqueteMensaje.getNombreSala()).getUsuariosConectados()
-						.contains(conectado.getPaqueteUsuario().getUsername())) {
-					conectado.getSalida().writeObject(gson.toJson(paqueteMensaje));
+			if (!nombreSala.equals("Ventana Principal")) {
+				for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
+					if (Servidor.getSalas().get(paqueteMensaje.getNombreSala()).getUsuariosConectados()
+							.contains(conectado.getPaqueteUsuario().getUsername())) {
+						conectado.getSalida().writeObject(gson.toJson(paqueteMensaje));
+					}
 				}
-			}
-			String msjAgregar = paqueteMensaje.getUserEmisor() + ": " + paqueteMensaje.getMsj() + "\n";
-			Servidor.getSalas().get(paqueteMensaje.getNombreSala()).agregarMsj(msjAgregar);
-			Servidor.getConector().guardarChatSala(paqueteMensaje);
+					String msjAgregar = paqueteMensaje.getUserEmisor() + ": " + paqueteMensaje.getMsjChat() + "\n";
+					Servidor.getSalas().get(paqueteMensaje.getNombreSala()).agregarMsj(msjAgregar);
+					Servidor.getConector().guardarChatSala(paqueteMensaje);
+				} else {
+					paqueteMensaje.setComando(Comando.CHATALL);
+					for (EscuchaCliente conectado : Servidor.getClientesConectados()) {
+						conectado.getSalida().writeObject(gson.toJson(paqueteMensaje));
+					}
+				}
 		} catch (IOException e) {
 			Servidor.getLog().append("Error al tratar de responder la solicitud de clima."+ System.lineSeparator());
 			e.printStackTrace();
@@ -64,21 +71,6 @@ public class Clima extends ComandoChatBot {
 
 
 	}
-
-
-	private String getCiudad() {
-		JSONObject j;
-		try {
-			j = getJSONFromURL("http://ip-api.com/json");
-			String r = j.getString("city");
-			if (r.equals("N/A")) return null;
-			else return r;
-		} catch (IOException e) {
-			Servidor.getLog().append("No se pudo encontrar los datos de la ciudad.");
-			return null;
-		}
-	}
-
 
 	public String toString() {
 		return new String("Pronostico: "+ this.descripcion +" "+ "Temperatura: " + this.temp + " �C. Maxima: " + this.temp_max + " �C. Minima: "+ this.temp_min + " �C. Presion: " + this.presion + " hPa. Visibilidad: " + this.visibilidad + " km/h. Velocidad del viento: " + this.vel_viento + " km/h.");
