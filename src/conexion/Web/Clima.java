@@ -22,7 +22,7 @@ public class Clima {
 			this.temp_min = obj.getJSONObject("main").getDouble("temp_min");
 			this.temp_max = obj.getJSONObject("main").getDouble("temp_max");
 			this.presion = obj.getJSONObject("main").getInt("pressure");
-			this.visibilidad = obj.getDouble("visibility")/10000; // en km
+			this.visibilidad = obj.getDouble("visibility")/10000;
 			this.vel_viento = obj.getJSONObject("wind").getDouble("speed");
 		} catch (Exception e) {
 			Servidor.getLog().append("Error al obtener el JSON del clima POLIMORFISMO");

@@ -91,7 +91,7 @@ public class Servidor extends Thread {
 		btnIniciar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				server = new Thread(new Servidor());
-				server.start(); // Se lanza un nuevo hilo 
+				server.start();
 				btnIniciar.setEnabled(false);
 				btnParar.setEnabled(true);
 				ventana.getRootPane().setDefaultButton(btnParar);
@@ -187,7 +187,6 @@ public class Servidor extends Thread {
 
 			while (estadoServer) {
 				Socket cliente = serverSocket.accept();
-				//Agrego el Socket a la lista de Sockets
 				SocketsConectados.add(cliente);
 
 				ipRemota = cliente.getInetAddress().getHostAddress();
@@ -280,12 +279,10 @@ public class Servidor extends Thread {
 		if(!UsuariosConectados.contains(pqm.getUserReceptor())) {
 			result = false;
 		}
-		// Si existe inicio sesion
 		if (result) {
 			Servidor.getLog().append(pqm.getUserEmisor() + " envió mensaje a " + pqm.getUserReceptor() + System.lineSeparator());
 			return true;
 		} else {
-			// Si no existe informo y devuelvo false
 			Servidor.getLog().append("El mensaje para " + pqm.getUserReceptor() + " no se ha podido enviar, usario inexistente/desconectado." + System.lineSeparator());
 			return false;
 		}
@@ -296,12 +293,10 @@ public class Servidor extends Thread {
 		if(!UsuariosConectados.contains(paqueteMensaje.getUserReceptor())) {
 			result = false;
 		}
-		// Si existe inicio sesion
 		if (result) {
 			Servidor.getLog().append(paqueteMensaje.getUserEmisor() + " mencionó " + paqueteMensaje.getUserReceptor() + System.lineSeparator());
 			return true;
 		} else {
-			// Si no existe informo y devuelvo false
 			Servidor.getLog().append("La mención para el usuario " + paqueteMensaje.getUserReceptor() + " no se ha podido enviar, usario inexistente/desconectado." + System.lineSeparator());
 			return false;
 		}
@@ -312,12 +307,10 @@ public class Servidor extends Thread {
 		if(UsuariosConectados.size() != contador+1) {
 			result = false;
 		}
-		// Si existe inicio sesion
 		if (result) {
 			Servidor.getLog().append("Se ha enviado un mensaje general" + System.lineSeparator());
 			return true;
 		} else {
-			// Si no existe informo y devuelvo false
 			Servidor.getLog().append("Se ha desconectado un usuario" + System.lineSeparator());
 			return false;
 		}
@@ -344,12 +337,10 @@ public class Servidor extends Thread {
 		if(UsuariosConectados.size() != contador+1) {
 			result = false;
 		}
-		// Si existe inicio sesion
 		if (result) {
 			Servidor.getLog().append("Se ha enviado un mensaje por sala" + System.lineSeparator());
 			return true;
 		} else {
-			// Si no existe informo y devuelvo false
 			Servidor.getLog().append("Se ha desconectado un usuario" + System.lineSeparator());
 			return false;
 		}

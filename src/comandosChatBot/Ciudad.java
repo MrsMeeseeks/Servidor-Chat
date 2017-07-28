@@ -24,7 +24,6 @@ public class Ciudad extends ComandoChatBot{
 				Servidor.getLog().append("No se pudo encontrar la ciudad indicada json la la ciudad Json.");
 			}
 			
-			
 			} catch (Exception e) {
 				Servidor.getLog().append("No se pudo obtener json la la ciudad Json.");
 			}

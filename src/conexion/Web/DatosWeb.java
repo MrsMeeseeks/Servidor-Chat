@@ -133,7 +133,7 @@ public final class DatosWeb {
 	    JSONObject j;
 		try {
 			j = DatosWeb.getJSONFromURL("http://ip-api.com/json");
-		    String r = /*j.getString("city") + "\n " + j.getString("country") + "\n" +  */j.getString("timezone");
+		    String r = j.getString("city") + "\n " + j.getString("country") + "\n" +  j.getString("timezone");
 		    if (r.equals("N/A")) return null;
 		    else return r;
 		} catch (IOException e) {
@@ -164,8 +164,7 @@ public final class DatosWeb {
 			JSONObject j = DatosWeb.getJSONFromURL("http://api.timezonedb.com/v2/get-time-zone?key=J74Q9QN1RN7M&format=json&by=zone&zone=" + americaYOtros);
 			String h = j.getString("formatted");
 			return h;
-			//return new SimpleDateFormat("dd-mm-yyyy HH:mm:ss").parse(j.getInt("day")+"-"+j.getInt("month")+"-"+j.getInt("year")+" "+j.getInt("hours")+":"+j.getInt("minutes")+":"+j.getInt("seconds"));
-		} catch (Exception e) {
+			} catch (Exception e) {
 			Servidor.getLog().append("No se pudo encontrar los datos en getFechita DATOSWEB");
 			return null;
 		}
