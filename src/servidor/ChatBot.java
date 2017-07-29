@@ -16,36 +16,43 @@ public class ChatBot extends Thread {
 	private PaqueteMensaje paqueteMensaje;
 	private String mensajeAEnviar;
 	private String mensajeRecibido;
-
+	private String nombrePaqueteComandos;
+	private ComandoChatBot comando;
 
 	public ChatBot(HashMap<String,String> map) {
 		this.sinonimos = map;
+		this.nombrePaqueteComandos = "comandosChatBot";
 	}
 
+	public ChatBot(HashMap<String,String> map , String paquete) {
+		this.sinonimos = map;
+		this.nombrePaqueteComandos = paquete;
+	}
 
 	@Override
 	public void run() {
 		synchronized (this) {
 			try {
-				ComandoChatBot comando; 
+				 
 
 				while (true) {
-					wait();
-
+										
 					if (paqueteMensaje!=null) {
+						
 						mensajeRecibido = paqueteMensaje.getMsjChat();
 						procesarMensaje();
-						comando = (ComandoChatBot) Class.forName("comandosChatBot" + "." + codigo).newInstance();
+						comando = (ComandoChatBot) Class.forName(nombrePaqueteComandos + "." + codigo).newInstance();
 						comando.setNombreSala(paqueteMensaje.getNombreSala());
 						comando.ejecutar();
-						codigo=null;
+						paqueteMensaje = null;
+					} else {
+						this.wait();
 					}
-
 				}
-			} catch (Exception e) {
-				e.printStackTrace();
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException | InterruptedException e) {
+				Servidor.getLog().append("Error en el proceso del chatbot." + System.lineSeparator());
 			}
-		}
+		} 
 	}
 
 	public void procesarMensaje(){
@@ -63,7 +70,7 @@ public class ChatBot extends Thread {
 	
 		for (int i = 0; i < partes.length; i++) {
 			if (sinonimos.containsKey(partes[i].toLowerCase())) {
-				setCodigo(sinonimos.get(partes[i]));
+				setCodigo(sinonimos.get(partes[i].toLowerCase()));
 			}
 		} 
 		if(codigo==null){

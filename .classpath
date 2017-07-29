@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="sqlite-jdbc-3.15.1.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Cliente-Chat"/>
 	<classpathentry kind="lib" path="json-20170516.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

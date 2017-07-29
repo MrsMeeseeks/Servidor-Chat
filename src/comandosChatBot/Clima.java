@@ -28,14 +28,18 @@ public class Clima extends ComandoChatBot {
 				JSONObject obj = getJSONFromURL("http://api.openweathermap.org/data/2.5/weather?q="
 						+ URLEncoder.encode(ciudad, "UTF-8")
 						+ "&appid=612a51535e726e4c14f5361e57802030&lang=es&units=metric");
-				descripcion = obj.getJSONArray("weather").getJSONObject(0).getString("description");
-				temp = obj.getJSONObject("main").getDouble("temp");
-				temp_min = obj.getJSONObject("main").getDouble("temp_min");
-				temp_max = obj.getJSONObject("main").getDouble("temp_max");
-				presion = obj.getJSONObject("main").getInt("pressure");
-				visibilidad = obj.getDouble("visibility") / 10000;
-				vel_viento = obj.getJSONObject("wind").getDouble("speed");
-				msjFinal = toString();
+				if (obj!=null) {
+					descripcion = obj.getJSONArray("weather").getJSONObject(0).getString("description");
+					temp = obj.getJSONObject("main").getDouble("temp");
+					temp_min = obj.getJSONObject("main").getDouble("temp_min");
+					temp_max = obj.getJSONObject("main").getDouble("temp_max");
+					presion = obj.getJSONObject("main").getInt("pressure");
+					visibilidad = obj.getDouble("visibility") / 10000;
+					vel_viento = obj.getJSONObject("wind").getDouble("speed");
+					msjFinal = toString();
+				} else {
+					msjFinal = "Error al tratar de conseguir los datos del clima de la ciudad.";
+				}
 			} catch (IOException e) {
 				Servidor.getLog().append("No se pudieron encontrar los datos del clima." + System.lineSeparator());
 				e.printStackTrace();

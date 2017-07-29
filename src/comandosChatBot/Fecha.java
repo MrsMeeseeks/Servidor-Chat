@@ -2,7 +2,6 @@ package comandosChatBot;
 
 import java.io.IOException;
 
-
 import org.json.JSONObject;
 
 import paqueteEnvios.Comando;
@@ -10,9 +9,8 @@ import paqueteEnvios.PaqueteMensaje;
 import servidor.EscuchaCliente;
 import servidor.Servidor;
 
-public class FechaHora extends ComandoChatBot{	
+public class Fecha extends ComandoChatBot{	
 	private String[] fecha;
-	private String hora;
 	private String msjFinal;
 	@Override
 	public void ejecutar() {
@@ -22,12 +20,11 @@ public class FechaHora extends ComandoChatBot{
 			if (j!=null) {
 				String result = j.getString("formatted");
 				String[] fechaYhora = result.split(" ", 2);
-				hora = fechaYhora[1];
 				fecha = fechaYhora[0].split("-", 3);
-				msjFinal = "La fecha es: " + fecha[2] + "-" + fecha[1] + "-" + fecha[0] + "\n" + "La hora es: "+ hora;
+				msjFinal = "La fecha es: " + fecha[2] + "-" + fecha[1] + "-" + fecha[0];
 			} else {
-				Servidor.getLog().append("No se pudo encontrar los datos de la fecha y hora." + System.lineSeparator());
-				msjFinal = "Alfred: Error al tratar de conseguir los datos de la fecha y hora."+"\n";
+				Servidor.getLog().append("No se pudo encontrar los datos de la fecha." + System.lineSeparator());
+				msjFinal = "Error al tratar de conseguir los datos de la fecha.";
 			}
 
 		} else {
@@ -53,7 +50,7 @@ public class FechaHora extends ComandoChatBot{
 				}
 			}
 		} catch (IOException e) {
-			Servidor.getLog().append("Error al tratar de responder la solicitud de fecha y hora." + System.lineSeparator());
+			Servidor.getLog().append("Error al tratar de responder la solicitud de fecha." + System.lineSeparator());
 			e.printStackTrace();
 		}			
 	}
@@ -70,4 +67,3 @@ public class FechaHora extends ComandoChatBot{
 		return null;
 	}
 }
-
