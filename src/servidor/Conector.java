@@ -41,9 +41,10 @@ public class Conector {
 
 	public boolean registrarUsuario(PaqueteUsuario user) {
 		try {
-			PreparedStatement st = connect.prepareStatement("INSERT INTO registro (usuario, password) VALUES (?,?)");
+			PreparedStatement st = connect.prepareStatement("INSERT INTO registro (usuario, password) VALUES (?,?)");//, foto) VALUES (?,?,?)");
 			st.setString(1, user.getUsername());
 			st.setString(2, user.getPassword());
+//			st.setString(3, "noItem");
 			st.execute();
 			Servidor.getLog().append("El usuario " + user.getUsername() + " se ha registrado." + System.lineSeparator());
 			return true;
@@ -135,10 +136,12 @@ public class Conector {
 			result = st.executeQuery();
 
 			String password = result.getString("password");
+//			String fotoPerfil = result.getString("foto");
 
 			PaqueteUsuario paqueteUsuario = new PaqueteUsuario();
 			paqueteUsuario.setUsername(usuario);
 			paqueteUsuario.setPassword(password);
+//			paqueteUsuario.setFotoPerfil(paqueteUsuario.buscarFotoPerfil(fotoPerfil));
 
 			return paqueteUsuario;
 		} catch (SQLException e) {
@@ -251,4 +254,19 @@ public class Conector {
 			return true;
 		}
 	}
+	
+//	public boolean actualizarPerfil(PaqueteUsuario user) {
+//		try {
+//			PreparedStatement st = connect.prepareStatement("UPDATE registro SET foto = ? WHERE usuario = ?");
+//			st.setString(1, user.getNombreFoto());
+//			st.setString(2, user.getUsername());
+//			st.executeUpdate();
+//			return true;
+//
+//		} catch (SQLException e) {
+//			Servidor.getLog().append("La foto " + user.getNombreFoto() + " fallo al intentar actualiarze en la BD" + System.lineSeparator());
+//			e.printStackTrace();
+//			return false;
+//		}
+//	}
 }

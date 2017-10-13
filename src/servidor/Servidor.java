@@ -19,6 +19,8 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
+import javax.swing.ImageIcon;
+
 import org.json.JSONObject;
 
 import paqueteEnvios.PaqueteMensaje;
@@ -32,6 +34,9 @@ public class Servidor extends Thread {
 
 	public static ArrayList<Socket> SocketsConectados = new ArrayList<Socket>();
 	public static ArrayList<String> UsuariosConectados = new ArrayList<String>();
+//	///
+//	public static Map<String, ImageIcon> PerfilesYUsuariosConectados = new HashMap<>();
+//	///
 	private static ArrayList<EscuchaCliente> clientesConectados = new ArrayList<>();
 	public static Map<String, Socket> mapConectados = new HashMap<>();
 
