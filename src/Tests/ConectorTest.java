@@ -1,10 +1,7 @@
 package Tests;
 
-import static org.junit.Assert.*;
-
+import java.io.IOException;
 import java.util.HashMap;
-
-import javax.swing.SingleSelectionModel;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -43,7 +40,11 @@ public class ConectorTest {
 		pu.setUsername("UserTest");
 		pu.setPassword("test");
 
-		conector.registrarUsuario(pu);
+		try {
+			conector.registrarUsuario(pu);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		pu = conector.getUsuario("UserTest");
 		conector.close();

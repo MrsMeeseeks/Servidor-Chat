@@ -1,10 +1,14 @@
 package servidor;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,13 +43,15 @@ public class Conector {
 		}
 	}
 
-	public boolean registrarUsuario(PaqueteUsuario user) {
+	public boolean registrarUsuario(PaqueteUsuario user) throws IOException {
 		try {
-			PreparedStatement st = connect.prepareStatement("INSERT INTO registro (usuario, password) VALUES (?,?)");//, foto) VALUES (?,?,?)");
+			PreparedStatement st = connect.prepareStatement("INSERT INTO registro (usuario, password, foto) VALUES (?,?,?)",Statement.RETURN_GENERATED_KEYS);
 			st.setString(1, user.getUsername());
 			st.setString(2, user.getPassword());
-//			st.setString(3, "noItem");
-			st.execute();
+            st.setString(3, "noItem.png");
+            
+            st.execute();
+			
 			Servidor.getLog().append("El usuario " + user.getUsername() + " se ha registrado." + System.lineSeparator());
 			return true;
 		} catch (SQLException ex) {
@@ -74,12 +80,12 @@ public class Conector {
 			Servidor.getLog().append("El usuario " + user.getUsername()
 			+ " ha realizado un intento fallido de inicio de sesión." + System.lineSeparator());
 			return false;
-
+			
 		} catch (SQLException e) {
 
 			e.printStackTrace();
 			return false;
-		} 
+		}
 	}
 
 	public boolean registrarSala(PaqueteSala paqueteSala) {
@@ -136,17 +142,24 @@ public class Conector {
 			result = st.executeQuery();
 
 			String password = result.getString("password");
-//			String fotoPerfil = result.getString("foto");
+			String nombreFoto = result.getString("foto");
+			
+			byte[] fotoPerfil = PaqueteUsuario.deArchivoABytes(
+					new File("perfiles/"+nombreFoto));
 
 			PaqueteUsuario paqueteUsuario = new PaqueteUsuario();
 			paqueteUsuario.setUsername(usuario);
 			paqueteUsuario.setPassword(password);
-//			paqueteUsuario.setFotoPerfil(paqueteUsuario.buscarFotoPerfil(fotoPerfil));
+			paqueteUsuario.setFotoPerfil(fotoPerfil);
 
 			return paqueteUsuario;
 		} catch (SQLException e) {
 			Servidor.getLog().append("Fallo al intentar recuperar el usuario " + usuario + System.lineSeparator());
 			Servidor.getLog().append(e.getMessage() + System.lineSeparator());
+			e.printStackTrace();
+		} 
+		catch (FileNotFoundException e) {
+			Servidor.getLog().append("Fallo al intentar convertir foto del usuario " + usuario + System.lineSeparator());
 			e.printStackTrace();
 		}
 
@@ -200,11 +213,11 @@ public class Conector {
 				result.next();
 			}
 			Servidor.alfred = new ChatBot(sinonimos);
-			Servidor.log.append("Se cargo Alfred correctamente." + System.lineSeparator());
+			Servidor.getLog().append("Se cargo Alfred correctamente." + System.lineSeparator());
 			return true;
 		} catch (SQLException e) {
-			Servidor.log.append("Error al intentar cargar Alfred." + System.lineSeparator());
-			Servidor.log.append(e.getMessage() + System.lineSeparator());
+			Servidor.getLog().append("Error al intentar cargar Alfred." + System.lineSeparator());
+			Servidor.getLog().append(e.getMessage() + System.lineSeparator());
 			e.printStackTrace();
 			return false;
 		}
@@ -255,18 +268,23 @@ public class Conector {
 		}
 	}
 	
-//	public boolean actualizarPerfil(PaqueteUsuario user) {
-//		try {
-//			PreparedStatement st = connect.prepareStatement("UPDATE registro SET foto = ? WHERE usuario = ?");
-//			st.setString(1, user.getNombreFoto());
-//			st.setString(2, user.getUsername());
-//			st.executeUpdate();
-//			return true;
-//
-//		} catch (SQLException e) {
-//			Servidor.getLog().append("La foto " + user.getNombreFoto() + " fallo al intentar actualiarze en la BD" + System.lineSeparator());
-//			e.printStackTrace();
-//			return false;
-//		}
-//	}
+	public boolean actualizarPerfil(PaqueteUsuario user) throws IOException {
+		try {
+			PreparedStatement st = connect.prepareStatement("UPDATE registro SET foto = ? WHERE usuario = ?");
+
+			st.setString(1, user.getUsername() + ".png");
+			st.setString(2, user.getUsername());
+            st.executeUpdate();
+
+            Servidor.log.append("El usuario" + user.getUsername()
+            	+"ha cambiado su foto de perfil" + System.lineSeparator());
+			return true;
+
+		} catch (SQLException e) {
+			Servidor.log.append("La foto falló al intentar actualiarze en la BD"
+					+ System.lineSeparator());
+			e.printStackTrace();
+			return false;
+		}
+	}
 }

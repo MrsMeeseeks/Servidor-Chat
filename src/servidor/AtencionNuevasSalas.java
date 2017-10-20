@@ -21,7 +21,8 @@ public class AtencionNuevasSalas extends Thread {
 
 					wait();
 
-					PaqueteDeUsuariosYSalas psu =  (PaqueteDeUsuariosYSalas) new PaqueteDeUsuariosYSalas(null,Servidor.getNombresSalasDisponibles())
+					PaqueteDeUsuariosYSalas psu =  (PaqueteDeUsuariosYSalas) new
+							PaqueteDeUsuariosYSalas(null,Servidor.getNombresSalasDisponibles())
 							.clone();
 					psu.setComando(Comando.NEWSALA);
 					psu.setMsj(Paquete.msjExito);

@@ -1,33 +1,20 @@
 package Tests;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.Socket;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
-import java.nio.channels.AsynchronousServerSocketChannel;
 import java.util.HashMap;
 import java.util.Scanner;
-import java.util.concurrent.CountDownLatch;
 
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import cliente.Cliente;
-import comandosChatBot.Clima;
-import comandosChatBot.ComandoChatBot;
-import paqueteEnvios.Comando;
 import paqueteEnvios.PaqueteMensaje;
-import paqueteEnvios.PaqueteSala;
 import servidor.ChatBot;
-import servidor.Conector;
-import servidor.EscuchaCliente;
-import servidor.Servidor;
 
 public class testChatBot {
 

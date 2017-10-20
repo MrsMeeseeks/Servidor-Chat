@@ -1,9 +1,13 @@
 package servidor;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -19,30 +23,25 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 
-import javax.swing.ImageIcon;
-
 import org.json.JSONObject;
 
 import paqueteEnvios.PaqueteMensaje;
 import paqueteEnvios.PaqueteSala;
 
-import java.awt.TextArea;
-import java.awt.Color;
-import java.awt.Font;
-
 public class Servidor extends Thread {
 
 	public static ArrayList<Socket> SocketsConectados = new ArrayList<Socket>();
 	public static ArrayList<String> UsuariosConectados = new ArrayList<String>();
-//	///
-//	public static Map<String, ImageIcon> PerfilesYUsuariosConectados = new HashMap<>();
-//	///
+	
+//	public static Hashtable<String,byte[]> FotosUsuariosConectados = new Hashtable<String,byte[]>();
+
 	private static ArrayList<EscuchaCliente> clientesConectados = new ArrayList<>();
 	public static Map<String, Socket> mapConectados = new HashMap<>();
 
 	public static ArrayList<String> salasNombresDisponibles = new ArrayList<String>();
 	public static Map<String, PaqueteSala> salas = new HashMap<>();
-
+	
+//	public static ArrayList<byte[]> fotosConectados = new ArrayList<byte[]>(); 
 
 	private static String ciudad;
 	private static ServerSocket serverSocket;
@@ -118,7 +117,11 @@ public class Servidor extends Thread {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					estadoServer = false;
+					
 					UsuariosConectados = new ArrayList<String>();
+//					fotosConectados = new ArrayList<byte[]>();
+//					FotosUsuariosConectados = new Hashtable<String,byte[]>();
+					
 					server.stop();
 					atencionConexiones.stop();
 					for (EscuchaCliente cliente : clientesConectados) {
@@ -148,7 +151,11 @@ public class Servidor extends Thread {
 				if (serverSocket != null) {
 					try {
 						estadoServer = false;
+						
 						UsuariosConectados = new ArrayList<String>();
+//						fotosConectados = new ArrayList<byte[]>();
+//						FotosUsuariosConectados = new Hashtable<String,byte[]>();
+						
 						server.stop();
 						atencionConexiones.stop();
 						for (EscuchaCliente cliente : clientesConectados) {
@@ -302,6 +309,10 @@ public class Servidor extends Thread {
 	public static ArrayList<String> getUsuariosConectados() {
 		return UsuariosConectados;
 	}
+	
+//	public static Hashtable<String, byte[]> getFotosUsuariosConectados() {
+//		return FotosUsuariosConectados;
+//	}
 
 	public static ArrayList<Socket> getSocketsConectados() {
 		return SocketsConectados;
@@ -405,10 +416,15 @@ public class Servidor extends Thread {
 		salas.remove(nombreSala);
 	}
 
-	public static void conectarUsuario(String username) {
+	public static void conectarUsuario(String username) throws FileNotFoundException {
 		UsuariosConectados.add(username);
+		
 		int index = Servidor.getUsuariosConectados().indexOf(username);
 		mapConectados.put(username, SocketsConectados.get(index));
+		
+//		String nombreArchivo = "perfiles/" + username + ".png";
+//		byte[] foto = PaqueteUsuario.deArchivoABytes(new File(nombreArchivo));
+//		fotosConectados.add(foto);
 	}
 
 	public static void agregarSalaDisponible(PaqueteSala paqueteSala) {
@@ -416,11 +432,17 @@ public class Servidor extends Thread {
 		salas.put(paqueteSala.getNombreSala(), paqueteSala);
 	}
 
-	public static void desconectarUsuario(String username, EscuchaCliente escuchaCliente) {
+	public static void desconectarUsuario(String username, EscuchaCliente escuchaCliente) throws FileNotFoundException {
 		int index = Servidor.UsuariosConectados.indexOf(username);
 		SocketsConectados.remove(index);
 		mapConectados.remove(username);
 		UsuariosConectados.remove(username);
 		clientesConectados.remove(escuchaCliente);
+//		byte[] foto = PaqueteUsuario.deArchivoABytes(new File("perfiles/" + username + ".png"));
+//		fotosConectados.remove(foto);
 	}
+	
+//	public static ArrayList<byte[]> getFotosConectados() {
+//		return fotosConectados;
+//	}
 }

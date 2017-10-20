@@ -19,8 +19,9 @@ public class AtencionConexiones extends Thread {
 				while (true) {
 
 					wait();
-					PaqueteDeUsuariosYSalas pdu = (PaqueteDeUsuariosYSalas) new PaqueteDeUsuariosYSalas(Servidor.getUsuariosConectados(), Servidor.getNombresSalasDisponibles())
-							.clone();
+					PaqueteDeUsuariosYSalas pdu = (PaqueteDeUsuariosYSalas) new
+							PaqueteDeUsuariosYSalas(Servidor.getUsuariosConectados(),
+									Servidor.getNombresSalasDisponibles()).clone();
 					pdu.setComando(Comando.CONEXION);
 					String s = gson.toJson(pdu);
 					for (EscuchaCliente conectado : Servidor.getClientesConectados())
