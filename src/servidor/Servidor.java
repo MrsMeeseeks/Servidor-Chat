@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -22,26 +23,26 @@ import java.util.Scanner;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
+import javax.xml.bind.DatatypeConverter;
 
 import org.json.JSONObject;
 
 import paqueteEnvios.PaqueteMensaje;
 import paqueteEnvios.PaqueteSala;
+import paqueteEnvios.PaqueteUsuario;
 
 public class Servidor extends Thread {
 
 	public static ArrayList<Socket> SocketsConectados = new ArrayList<Socket>();
 	public static ArrayList<String> UsuariosConectados = new ArrayList<String>();
 	
-//	public static Hashtable<String,byte[]> FotosUsuariosConectados = new Hashtable<String,byte[]>();
-
 	private static ArrayList<EscuchaCliente> clientesConectados = new ArrayList<>();
 	public static Map<String, Socket> mapConectados = new HashMap<>();
 
 	public static ArrayList<String> salasNombresDisponibles = new ArrayList<String>();
 	public static Map<String, PaqueteSala> salas = new HashMap<>();
 	
-//	public static ArrayList<byte[]> fotosConectados = new ArrayList<byte[]>(); 
+	public static ArrayList<String> fotosConectados = new ArrayList<String>(); 
 
 	private static String ciudad;
 	private static ServerSocket serverSocket;
@@ -119,8 +120,6 @@ public class Servidor extends Thread {
 					estadoServer = false;
 					
 					UsuariosConectados = new ArrayList<String>();
-//					fotosConectados = new ArrayList<byte[]>();
-//					FotosUsuariosConectados = new Hashtable<String,byte[]>();
 					
 					server.stop();
 					atencionConexiones.stop();
@@ -153,7 +152,7 @@ public class Servidor extends Thread {
 						estadoServer = false;
 						
 						UsuariosConectados = new ArrayList<String>();
-//						fotosConectados = new ArrayList<byte[]>();
+//						fotosConectados = new ArrayList<String>();
 //						FotosUsuariosConectados = new Hashtable<String,byte[]>();
 						
 						server.stop();
@@ -422,9 +421,10 @@ public class Servidor extends Thread {
 		int index = Servidor.getUsuariosConectados().indexOf(username);
 		mapConectados.put(username, SocketsConectados.get(index));
 		
-//		String nombreArchivo = "perfiles/" + username + ".png";
-//		byte[] foto = PaqueteUsuario.deArchivoABytes(new File(nombreArchivo));
-//		fotosConectados.add(foto);
+		String nombreArchivo = "perfiles/" + username + ".png";
+		byte[] foto = PaqueteUsuario.deArchivoABytes(new File(nombreArchivo));
+		String base64Encode = DatatypeConverter.printBase64Binary(foto);
+		fotosConectados.add(base64Encode);
 	}
 
 	public static void agregarSalaDisponible(PaqueteSala paqueteSala) {
@@ -438,11 +438,16 @@ public class Servidor extends Thread {
 		mapConectados.remove(username);
 		UsuariosConectados.remove(username);
 		clientesConectados.remove(escuchaCliente);
-//		byte[] foto = PaqueteUsuario.deArchivoABytes(new File("perfiles/" + username + ".png"));
-//		fotosConectados.remove(foto);
+		
+		byte[] foto = PaqueteUsuario.deArchivoABytes(new File("perfiles/" + username + ".png"));
+		fotosConectados.remove(DatatypeConverter.printBase64Binary(foto));
 	}
 	
-//	public static ArrayList<byte[]> getFotosConectados() {
-//		return fotosConectados;
-//	}
+	public static ArrayList<String> getFotosConectados() {
+		return fotosConectados;
+	}
+	
+	public static void setFotosConectados(ArrayList<String> fotosConectados) {
+		Servidor.fotosConectados = fotosConectados;
+	}
 }

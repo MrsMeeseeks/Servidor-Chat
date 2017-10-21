@@ -23,7 +23,8 @@ public class InicioSesion extends ComandoServer {
 				if (Servidor.getConector().loguearUsuario(paqueteUsuario)) {
 					escuchaCliente.setPaqueteUsuario(paqueteUsuario);
 					PaqueteDeUsuariosYSalas pus = new PaqueteDeUsuariosYSalas(Servidor.getUsuariosConectados(),
-							Servidor.getNombresSalasDisponibles());
+							Servidor.getNombresSalasDisponibles(),
+							Servidor.getFotosConectados());
 					pus.setComando(Comando.INICIOSESION);
 					pus.setMsj(Paquete.msjExito);
 
@@ -45,6 +46,7 @@ public class InicioSesion extends ComandoServer {
 			}
 		} catch (JsonSyntaxException | IOException e) {
 			Servidor.getLog().append("Fallo al intentar informar al usuario "+ paqueteUsuario.getUsername() + " sobre su intento de inicio de sesión." + System.lineSeparator());
+			System.out.println(e);
 		} 
 	}
 }

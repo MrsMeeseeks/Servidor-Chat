@@ -13,6 +13,7 @@ public class CambiarPerfil extends ComandoServer{
 		PaqueteUsuario paqueteUsuario = (PaqueteUsuario) gson.fromJson(cadenaLeida, PaqueteUsuario.class);
 		try {
 			Servidor.getConector().actualizarPerfil(paqueteUsuario);
+			
 			//guarda la foto en la carpeta de perfiles
 			String archivoDestino = "perfiles/" + paqueteUsuario.getUsername() + ".png";
 		    PaqueteUsuario.deBytesAFile(paqueteUsuario.getFotoPerfil(), archivoDestino);
